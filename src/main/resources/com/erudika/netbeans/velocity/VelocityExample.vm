@@ -1,0 +1,30 @@
+## Velocity Example Template.
+#macro (generateDesc $docu)
+#end
+#
+# Attention: Generated code! Do not modify by hand!
+#
+#include("disclaimer.txt" "opinion.txt")
+#include($foo $bar)
+#
+#set($musts = [])
+#if ($velocityCount % 4 == 0)
+#end
+#foreach ($import in $session.imports(false, false))
+import ${import};
+#end
+#foreach ($attribute in $transform.getLdapSchemaAttributes())
+#set ($oid = $transform.findTagValue($attribute, "oid"))
+attributeType ( $oid NAME '$attribute.name'
+#generateDesc($transform.javaDocGenerator().getDocumentation($attribute))
+
+#end
+#foreach ($item in ["Not", $my, "fault"])
+#end
+#foreach ($item in [1 .. 1])
+#end
+#set ($imperial = ["Munetaka","Koreyasu","Hisakira","Morikune"])
+#set($foo = {$foo : $bar, $blargh : $thingy})
+
+Example text with #[[unparsed content ]]# inside
+

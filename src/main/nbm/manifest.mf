@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+OpenIDE-Module: com.erudika.netbeans.velocity
+OpenIDE-Module-Layer: com/erudika/netbeans/velocity/layer.xml
+OpenIDE-Module-Localizing-Bundle: com/erudika/netbeans/velocity/Bundle.properties
+OpenIDE-Module-Specification-Version: 2.2.5
+
+

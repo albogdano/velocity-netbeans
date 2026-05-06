@@ -12,7 +12,6 @@ package com.erudika.netbeans.velocity;
 import java.io.IOException;
 import org.openide.filesystems.FileObject;
 import org.openide.loaders.DataNode;
-import org.openide.loaders.DataObject;
 import org.openide.loaders.DataObjectExistsException;
 import org.openide.loaders.MultiDataObject;
 import org.openide.loaders.MultiFileLoader;
@@ -27,10 +26,10 @@ import org.openide.util.Lookup;
  *
  * @author <a href="mailto:werner.jaeger@t-systems.com">Werner Jaeger</a>
  */
-@DataObject.Registration(
-		mimeType = VelocityLanguage.VTL_MIME_TYPE,
-		iconBase = "com/erudika/netbeans/velocity/VelocityFiles16.png",
-		displayName = "#LBL_VTLEditorTab")
+//@DataObject.Registration(
+//		mimeType = VelocityLanguage.VTL_MIME_TYPE,
+//		iconBase = "com/erudika/netbeans/velocity/VelocityFiles16.png",
+//		displayName = "#LBL_VTLEditorTab")
 public class VTLDataObject extends MultiDataObject {
 
 	private static final long serialVersionUID = 1L;

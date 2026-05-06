@@ -80,7 +80,7 @@
 			<artifactId>org-netbeans-modules-parsing-api</artifactId>
 			<version>${nbVer}</version>
 		</dependency>
-		<dependency>
+<!--		<dependency>
 			<groupId>org.netbeans.api</groupId>
 			<artifactId>org-netbeans-modules-csl-api</artifactId>
 			<version>${nbVer}</version>
@@ -89,7 +89,7 @@
 			<groupId>org.netbeans.api</groupId>
 			<artifactId>org-netbeans-modules-csl-types</artifactId>
 			<version>${nbVer}</version>
-		</dependency>
+		</dependency>-->
 		<dependency>
 			<groupId>org.netbeans.api</groupId>
 			<artifactId>org-netbeans-spi-editor-hints</artifactId>

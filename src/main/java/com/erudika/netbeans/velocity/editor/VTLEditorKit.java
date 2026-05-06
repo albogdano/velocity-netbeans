@@ -9,7 +9,7 @@
  */
 package com.erudika.netbeans.velocity.editor;
 
-import com.erudika.netbeans.velocity.VelocityLanguage;
+import com.erudika.netbeans.velocity.parser.VTLParser;
 import org.netbeans.modules.editor.NbEditorKit;
 
 /**
@@ -32,6 +32,6 @@ public class VTLEditorKit extends NbEditorKit {
 	 */
 	@Override
 	public String getContentType() {
-		return (VelocityLanguage.VTL_MIME_TYPE);
+		return (VTLParser.VTL_MIME_TYPE);
 	}
 }

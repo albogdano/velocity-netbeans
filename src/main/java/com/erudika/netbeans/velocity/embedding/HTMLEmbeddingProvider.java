@@ -7,8 +7,8 @@
  */
 package com.erudika.netbeans.velocity.embedding;
 
-import com.erudika.netbeans.velocity.VelocityLanguage;
 import com.erudika.netbeans.velocity.lexer.VTLTokenId;
+import com.erudika.netbeans.velocity.parser.VTLParser;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -26,7 +26,7 @@ import org.netbeans.modules.parsing.spi.EmbeddingProvider;
  *
  * @author <a href="mailto:werner.jaeger@t-systems.com">Werner Jaeger</a>
  */
-@EmbeddingProvider.Registration(mimeType = VelocityLanguage.VTL_MIME_TYPE, targetMimeType = "text/html")
+@EmbeddingProvider.Registration(mimeType = VTLParser.VTL_MIME_TYPE, targetMimeType = "text/html")
 public class HTMLEmbeddingProvider extends EmbeddingProvider
 {
     public static final String TARGET_MIME_TYPE = "text/html";

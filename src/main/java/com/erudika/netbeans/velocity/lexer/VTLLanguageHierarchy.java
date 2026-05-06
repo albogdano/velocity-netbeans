@@ -10,12 +10,16 @@
 package com.erudika.netbeans.velocity.lexer;
 
 import static com.erudika.netbeans.velocity.jcclexer.VelocityParserConstants.*;
-
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.netbeans.api.lexer.InputAttributes;
+import org.netbeans.api.lexer.Language;
+import org.netbeans.api.lexer.LanguagePath;
+import org.netbeans.api.lexer.Token;
+import org.netbeans.spi.lexer.LanguageEmbedding;
 import org.netbeans.spi.lexer.LanguageHierarchy;
 import org.netbeans.spi.lexer.Lexer;
 import org.netbeans.spi.lexer.LexerRestartInfo;
@@ -155,6 +159,22 @@ public class VTLLanguageHierarchy extends LanguageHierarchy<VTLTokenId>
    @Override protected Lexer<VTLTokenId> createLexer(final LexerRestartInfo<VTLTokenId> info)
    {
       return(new VTLLexer(info));
+   }
+
+   /**
+    * {@inheritDoc}
+    * Embeds HTML language into TEXT tokens so that HTML content between
+    * VTL directives receives proper syntax highlighting and code completion.
+    */
+   @Override protected LanguageEmbedding<?> embedding(final Token<VTLTokenId> token, final LanguagePath languagePath, final InputAttributes inputAttributes)
+   {
+      if ("TEXT".equals(token.id().name()))
+      {
+         final Language<?> htmlLang = Language.find("text/html");
+         if (htmlLang != null)
+            return(LanguageEmbedding.create(htmlLang, 0, 0, true));
+      }
+      return(null);
    }
 
    /**

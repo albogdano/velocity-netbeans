@@ -20,6 +20,11 @@
 		</dependency>
 		<dependency>
 			<groupId>org.netbeans.api</groupId>
+			<artifactId>org-netbeans-modules-editor-completion</artifactId>
+			<version>${nbVer}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.netbeans.api</groupId>
 			<artifactId>org-netbeans-api-annotations-common</artifactId>
 			<version>${nbVer}</version>
 		</dependency>
@@ -56,6 +61,11 @@
 		<dependency>
 			<groupId>org.netbeans.api</groupId>
 			<artifactId>org-netbeans-modules-lexer</artifactId>
+			<version>${nbVer}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.netbeans.api</groupId>
+			<artifactId>org-netbeans-modules-html-lexer</artifactId>
 			<version>${nbVer}</version>
 		</dependency>
 		<dependency>

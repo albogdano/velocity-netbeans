@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?><module codename="com.erudika.netbeans.velocity">
-    <module_version install_time="1777990081584" last="true" origin="installer" specification_version="2.2.5">
-        <file crc="3940849423" name="config/Modules/com-erudika-netbeans-velocity.xml"/>
-        <file crc="4071247208" name="modules/com-erudika-velocity-netbeans.jar"/>
-    </module_version>
-</module>

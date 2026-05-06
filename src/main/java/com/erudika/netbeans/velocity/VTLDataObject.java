@@ -28,8 +28,8 @@ import org.openide.util.Lookup;
  * @author <a href="mailto:werner.jaeger@t-systems.com">Werner Jaeger</a>
  */
 @DataObject.Registration(
-		mimeType = "text/x-velocity",
-		iconBase = "VelocityFiles16.png",
+		mimeType = VelocityLanguage.VTL_MIME_TYPE,
+		iconBase = "com/erudika/netbeans/velocity/VelocityFiles16.png",
 		displayName = "#LBL_VTLEditorTab")
 public class VTLDataObject extends MultiDataObject {
 

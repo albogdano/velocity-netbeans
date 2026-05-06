@@ -19,44 +19,22 @@ package com.erudika.netbeans.velocity.completion;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.logging.Logger;
-import javax.swing.text.BadLocationException;
-import javax.swing.text.Document;
-import org.netbeans.modules.csl.api.CodeCompletionContext;
+import java.util.List;
+import org.netbeans.modules.csl.api.CodeCompletionResult;
 import org.netbeans.modules.csl.api.CompletionProposal;
 import org.netbeans.modules.csl.spi.DefaultCompletionResult;
-import org.openide.util.Exceptions;
 
-/**
- * VTLCompletionResult.
- */
 public class VTLCompletionResult extends DefaultCompletionResult {
 
-	private final CodeCompletionContext context;
-
-	public VTLCompletionResult(CodeCompletionContext completionContext) {
-		super(new ArrayList<CompletionProposal>(), false);
-		context = completionContext;
+	public VTLCompletionResult(List<CompletionProposal> proposals) {
+		super(proposals != null ? proposals : new ArrayList<CompletionProposal>(), true);
 	}
 
-	public void addAll(final Collection<CompletionProposal> proposals) {
+	public void addAll(Collection<CompletionProposal> proposals) {
 		list.addAll(proposals);
 	}
 
 	public void add(CompletionProposal proposal) {
 		list.add(proposal);
 	}
-
-	@Override
-	public void afterInsert(CompletionProposal cp) {
-		Document doc = context.getParserResult().getSnapshot().getSource().getDocument(true);
-		try {
-			// Remove typed characters
-			Logger.getLogger(VTLCompletionResult.class.getName()).finest(doc.getText(cp.getAnchorOffset() - context.getPrefix().length(), context.getPrefix().length()));
-			doc.remove(cp.getAnchorOffset() - context.getPrefix().length(), context.getPrefix().length());
-		} catch (BadLocationException ex) {
-			Exceptions.printStackTrace(ex);
-		}
-	}
-
 }

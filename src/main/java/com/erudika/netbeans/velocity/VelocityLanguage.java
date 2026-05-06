@@ -22,6 +22,7 @@ import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
 import org.openide.awt.ActionReferences;
 import org.openide.filesystems.MIMEResolver;
+import org.openide.util.NbBundle.Messages;
 
 /**
  * @author <a href="mailto:werner.jaeger@t-systems.com">Werner Jaeger</a>
@@ -83,10 +84,11 @@ import org.openide.filesystems.MIMEResolver;
 		separatorAfter = 1400
 	)
 })
-@MIMEResolver.Registration(
-    displayName = "#text/x-velocity",
-	resource = "VTLResolver.xml"
-)
+@Messages({"LBL_VTL_LOADER=Velocity Files"})
+@MIMEResolver.ExtensionRegistration(
+		displayName = "#LBL_VTL_LOADER",
+		mimeType = VelocityLanguage.VTL_MIME_TYPE,
+		extension = {"vm", "vsl"})
 public class VelocityLanguage extends DefaultLanguageConfig {
 
 	private static final String LINE_COMMENT_PREFIX = "#";//NOI18N

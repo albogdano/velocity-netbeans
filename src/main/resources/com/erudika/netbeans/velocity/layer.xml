@@ -46,12 +46,12 @@
 				<file name="com.erudika.netbeans.velocity.parser.VTLSyntaxErrorsHighlightingTaskFactory.instance"/>
 				<folder name="EmbeddingProviders">
 					<file name="com-erudika-netbeans-velocity-embedding-HTMLEmbeddingProvider.instance"/>
-				</folder>
+			</folder>
 				<folder name="Completion">
 					<file name="com-erudika-netbeans-velocity-completion-VTLCompletionProvider.instance"/>
 				</folder>-->
-			</folder>
 		</folder>
+	</folder>
 	</folder>
 
 	<folder name="CslPlugins">

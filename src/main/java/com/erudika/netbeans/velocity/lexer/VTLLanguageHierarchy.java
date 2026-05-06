@@ -9,6 +9,7 @@
  */
 package com.erudika.netbeans.velocity.lexer;
 
+import com.erudika.netbeans.velocity.VelocityLanguage;
 import static com.erudika.netbeans.velocity.jcclexer.VelocityParserConstants.*;
 import java.util.Arrays;
 import java.util.Collection;
@@ -182,6 +183,6 @@ public class VTLLanguageHierarchy extends LanguageHierarchy<VTLTokenId>
     */
    @Override protected String mimeType()
    {
-      return("text/x-velocity");
+      return(VelocityLanguage.VTL_MIME_TYPE);
    }
 }

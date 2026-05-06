@@ -9,6 +9,7 @@
  */
 package com.erudika.netbeans.velocity.editor;
 
+import com.erudika.netbeans.velocity.VelocityLanguage;
 import org.netbeans.modules.editor.NbEditorKit;
 
 /**
@@ -16,20 +17,21 @@ import org.netbeans.modules.editor.NbEditorKit;
  *
  * @author <a href="mailto:werner.jaeger@t-systems.com">Werner Jaeger</a>
  */
-public class VTLEditorKit extends NbEditorKit
-{
-   /**
-    * Creates new {@code VTLEditorKit}.
-    */
-   public VTLEditorKit()
-   {
-   }
+public class VTLEditorKit extends NbEditorKit {
 
-   /**
-    * {@inheritDoc}
-    */
-   @Override public String getContentType()
-   {
-      return("text/x-velocity");
-   }
+	private static final long serialVersionUID = 1L;
+
+	/**
+	 * Creates new {@code VTLEditorKit}.
+	 */
+	public VTLEditorKit() {
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String getContentType() {
+		return (VelocityLanguage.VTL_MIME_TYPE);
+	}
 }

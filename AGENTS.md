@@ -4,10 +4,10 @@
 
 **velocity-netbeans** is an Apache NetBeans module plugin that provides editor support for Apache Velocity Template Language (VTL) files (`.vm` and `.vsl` extensions). It is built with Maven using the `nbm-maven-plugin`, targets NetBeans RELEASE280, and requires Java 21.
 
-**Maintainer:** com.erudika  
-**Original Author:** Werner Jaeger (T-Systems International GmbH)  
-**License:** CDDL 1.0  
-**Module Version:** 2.2.5  
+**Maintainer:** com.erudika
+**Original Author:** Werner Jaeger (T-Systems International GmbH)
+**License:** CDDL 1.0
+**Module Version:** 2.2.5
 **Maven Version:** 1.0.0-SNAPSHOT
 
 ---
@@ -60,7 +60,6 @@ src/main/resources/com/erudika/netbeans/velocity/
 ├── layer.xml                               # NetBeans layer (registry)
 ├── Bundle.properties                       # i18n strings
 ├── FontAndColors.xml                       # Syntax coloring config
-├── DefaultPreferences.xml                  # Editor preferences
 ├── VTLResolver.xml                         # MIME resolver (.vm, .vsl → text/x-velocity)
 ├── VelocityExample.vm                      # Example template
 ├── VTLTemplate.vsl                         # New file template

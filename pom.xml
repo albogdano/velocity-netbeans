@@ -12,6 +12,13 @@
 		<nbVer>RELEASE280</nbVer>
 	</properties>
 
+	<licenses>
+		<license>
+			<name>Common Development and Distribution License 1.0</name>
+			<url>https://opensource.org/license/CDDL-1.0</url>
+		</license>
+	</licenses>
+
 	<dependencies>
 		<dependency>
 			<groupId>org.netbeans.api</groupId>
@@ -71,6 +78,16 @@
 		<dependency>
 			<groupId>org.netbeans.api</groupId>
 			<artifactId>org-netbeans-modules-parsing-api</artifactId>
+			<version>${nbVer}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.netbeans.api</groupId>
+			<artifactId>org-netbeans-modules-csl-api</artifactId>
+			<version>${nbVer}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.netbeans.api</groupId>
+			<artifactId>org-netbeans-modules-csl-types</artifactId>
 			<version>${nbVer}</version>
 		</dependency>
 		<dependency>

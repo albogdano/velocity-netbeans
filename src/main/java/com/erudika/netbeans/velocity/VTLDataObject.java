@@ -16,51 +16,54 @@ import org.openide.loaders.DataObject;
 import org.openide.loaders.DataObjectExistsException;
 import org.openide.loaders.MultiDataObject;
 import org.openide.loaders.MultiFileLoader;
+import org.openide.nodes.Children;
 import org.openide.nodes.CookieSet;
 import org.openide.nodes.Node;
-import org.openide.nodes.Children;
-import org.openide.util.Lookup;
 import org.openide.text.DataEditorSupport;
+import org.openide.util.Lookup;
 
 /**
  * Provides support for handling of data objects with multiple files.
  *
  * @author <a href="mailto:werner.jaeger@t-systems.com">Werner Jaeger</a>
  */
-@DataObject.Registration(iconBase = "com/erudika/netbeans/velocity/VelocityFiles16.png", displayName = "#TODO", mimeType = "text/x-velocity")
-public class VTLDataObject extends MultiDataObject
-{
-   /**
-    * Creates new {@code VTLDataObject}.
-    *
-    * @param fo the primary file object.
-    * @param loader loader of this data object.
-    *
-    * @throws DataObjectExistsException if there is already a data object for
-    *         this primary file
-    * @throws IOException in case of an IO error.
-    */
-   public VTLDataObject(final FileObject fo, final MultiFileLoader loader) throws DataObjectExistsException, IOException
-   {
-      super(fo, loader);
+@DataObject.Registration(
+		mimeType = "text/x-velocity",
+		iconBase = "VelocityFiles16.png",
+		displayName = "#LBL_VTLEditorTab")
+public class VTLDataObject extends MultiDataObject {
 
-      final CookieSet cookies = getCookieSet();
-      cookies.add((Node.Cookie)DataEditorSupport.create(this, getPrimaryEntry(), cookies));
-   }
+	private static final long serialVersionUID = 1L;
 
-   /**
-    * {@inheritDoc}
-    */
-   @Override protected Node createNodeDelegate()
-   {
-      return(new DataNode(this, Children.LEAF, getLookup()));
-   }
+	/**
+	 * Creates new {@code VTLDataObject}.
+	 *
+	 * @param fo the primary file object.
+	 * @param loader loader of this data object.
+	 *
+	 * @throws DataObjectExistsException if there is already a data object for this primary file
+	 * @throws IOException in case of an IO error.
+	 */
+	public VTLDataObject(final FileObject fo, final MultiFileLoader loader) throws DataObjectExistsException, IOException {
+		super(fo, loader);
 
-   /**
-    * {@inheritDoc}
-    */
-   @Override public Lookup getLookup()
-   {
-      return(getCookieSet().getLookup());
-   }
+		final CookieSet cookies = getCookieSet();
+		cookies.add((Node.Cookie) DataEditorSupport.create(this, getPrimaryEntry(), cookies));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected Node createNodeDelegate() {
+		return (new DataNode(this, Children.LEAF, getLookup()));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public Lookup getLookup() {
+		return (getCookieSet().getLookup());
+	}
 }

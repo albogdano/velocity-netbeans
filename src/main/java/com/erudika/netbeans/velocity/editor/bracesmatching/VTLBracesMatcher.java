@@ -79,13 +79,13 @@ public class VTLBracesMatcher implements BracesMatcher, BracesMatcherFactory
                case VelocityParserConstants.FOREACH_DIRECTIVE:
                case VelocityParserConstants.IF_DIRECTIVE:
                case VelocityParserConstants.MACRO_DIRECTIVE:
-                  aiOrigins       = new int[] {ts.offset(), ts.offset() + token.length()};
+                  aiOrigins       = createMatchRange(ts.offset(), token);
                   m_iOriginOffset = aiOrigins[0];
                   m_fBackward     = false;
                   break;
 
                case VelocityParserConstants.END:
-                  aiOrigins       = new int[] {ts.offset(), ts.offset() + token.text().toString().trim().length()};
+                  aiOrigins       = createMatchRange(ts.offset(), token);
                   m_iOriginOffset = aiOrigins[0];
                   m_fBackward     = true;
                   break;
@@ -151,7 +151,7 @@ public class VTLBracesMatcher implements BracesMatcher, BracesMatcherFactory
                         if (m_fBackward)
                         {
                            if (iLevel == 0)
-                              aiMatches = new int[] {ts.offset(), ts.offset() + token.length()};
+                              aiMatches = createMatchRange(ts.offset(), token);
 
                            iLevel--;
                         }
@@ -164,7 +164,7 @@ public class VTLBracesMatcher implements BracesMatcher, BracesMatcherFactory
                         if (!m_fBackward)
                         {
                            if (iLevel == 0)
-                              aiMatches = new int[] {ts.offset(), ts.offset() + token.length()};
+                              aiMatches = createMatchRange(ts.offset(), token);
 
                            iLevel--;
                         }
@@ -215,5 +215,23 @@ public class VTLBracesMatcher implements BracesMatcher, BracesMatcherFactory
       }
 
       return(new ArrayList<TokenSequence<? extends TokenId>>(localList));
+   }
+
+   static int[] createMatchRange(final int iOffset, final Token<? extends TokenId> token)
+   {
+      final int iLength = getHighlightedLength(token.text());
+      return(new int[] {iOffset, iOffset + iLength});
+   }
+
+   static int getHighlightedLength(final CharSequence text)
+   {
+      if (text == null || text.length() == 0)
+         return(0);
+
+      int iEnd = text.length();
+      while (iEnd > 0 && Character.isWhitespace(text.charAt(iEnd - 1)))
+         --iEnd;
+
+      return(Math.max(1, iEnd));
    }
 }

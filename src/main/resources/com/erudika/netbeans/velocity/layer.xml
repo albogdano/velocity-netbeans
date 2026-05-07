@@ -68,6 +68,9 @@
          <folder name="x-velocity">
             <folder name="text">
                <folder name="html">
+                  <folder name="BracesMatchers">
+                     <file name="org-netbeans-modules-html-editor-HtmlBracesMatching.instance_hidden"/>
+                  </folder>
                   <folder name="CompletionProviders">
                      <file name="com-erudika-netbeans-velocity-completion-EmbeddedVTLCompletionProvider.instance">
                         <attr name="position" intvalue="1"/>

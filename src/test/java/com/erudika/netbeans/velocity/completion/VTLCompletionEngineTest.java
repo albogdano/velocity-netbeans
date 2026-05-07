@@ -17,9 +17,8 @@ package com.erudika.netbeans.velocity.completion;
 
 import java.util.List;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import org.junit.jupiter.api.Test;
 
 class VTLCompletionEngineTest {
 

@@ -27,6 +27,7 @@ import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
 import org.netbeans.api.editor.completion.Completion;
 import org.netbeans.spi.editor.completion.CompletionTask;
+import org.netbeans.spi.editor.completion.support.CompletionUtilities;
 
 public class VTLCompletionItem implements org.netbeans.spi.editor.completion.CompletionItem {
 
@@ -49,7 +50,7 @@ public class VTLCompletionItem implements org.netbeans.spi.editor.completion.Com
 
 	private final VTLCompletionProposal proposal;
 
-	public VTLCompletionItem(VTLCompletionProposal proposal) {
+	VTLCompletionItem(VTLCompletionProposal proposal) {
 		this.proposal = proposal;
 	}
 
@@ -92,13 +93,8 @@ public class VTLCompletionItem implements org.netbeans.spi.editor.completion.Com
 
 	@Override
 	public void render(Graphics g, Font defaultFont, Color defaultForeground, Color defaultBackground, int width, int height, boolean selected) {
-		g.setColor(selected ? new Color(220, 230, 255) : defaultBackground);
-		g.fillRect(0, 0, width, height);
-		g.setColor(defaultForeground);
-		g.setFont(defaultFont);
-		String text = proposal.getName() + " - " + (proposal.getDescription() != null ? proposal.getDescription() : "");
-		g.drawString(text, 5, height - 5);
-//		CompletionUtilities.renderHtml(null, text, null, g, defaultFont, (selected ? Color.white : Color.ORANGE), width, height, selected);
+		CompletionUtilities.renderHtml(null, getLeftLabelHtml(), getRightLabelHtml(), g, defaultFont,
+				(selected ? Color.decode("#be2042") : Color.decode("#f69922")), width, height, selected);
 	}
 
 	@Override
@@ -126,21 +122,28 @@ public class VTLCompletionItem implements org.netbeans.spi.editor.completion.Com
 	public void processKeyEvent(KeyEvent evt) {
 	}
 
-	private String getLabelHtml() {
+	private String getLeftLabelHtml() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("<html>");
+//		sb.append("<html>");
 		sb.append("<font color='#0066cc'>");
 		sb.append(proposal.getType().getLabel());
 		sb.append("</font> ");
 		sb.append("<b>");
 		sb.append(proposal.getName());
 		sb.append("</b>");
+//		sb.append("</html>");
+		return sb.toString();
+	}
+
+	private String getRightLabelHtml() {
+		StringBuilder sb = new StringBuilder();
+//		sb.append("<html>");
 		if (proposal.getDescription() != null && !proposal.getDescription().isEmpty()) {
-			sb.append(" <font color='#666666'>- ");
+			sb.append(" <font color='#CCCCCC'>");
 			sb.append(proposal.getDescription());
 			sb.append("</font>");
 		}
-		sb.append("</html>");
+//		sb.append("</html>");
 		return sb.toString();
 	}
 }

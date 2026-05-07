@@ -9,5 +9,8 @@
                 <goal>nbm:cluster</goal>
                 <goal>nbm:run-ide</goal>
             </goals>
+            <properties>
+                <jpda.listen>maven</jpda.listen>
+            </properties>
         </action>
     </actions>

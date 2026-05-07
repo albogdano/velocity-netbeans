@@ -17,26 +17,24 @@ package com.erudika.netbeans.velocity.completion;
 
 import com.erudika.netbeans.velocity.jcclexer.Directive;
 import com.erudika.netbeans.velocity.jcclexer.ParseException;
+import com.erudika.netbeans.velocity.jcclexer.SimpleCharStream;
 import com.erudika.netbeans.velocity.jcclexer.Token;
 import com.erudika.netbeans.velocity.jcclexer.TokenMgrError;
 import com.erudika.netbeans.velocity.jcclexer.VelocityParser;
 import com.erudika.netbeans.velocity.jcclexer.VelocityParserConstants;
 import com.erudika.netbeans.velocity.jcclexer.VelocityParserTokenManager;
-import com.erudika.netbeans.velocity.jcclexer.node.ASTIdentifier;
 import com.erudika.netbeans.velocity.jcclexer.node.ASTForEachStatement;
+import com.erudika.netbeans.velocity.jcclexer.node.ASTIdentifier;
 import com.erudika.netbeans.velocity.jcclexer.node.ASTMacroStatement;
 import com.erudika.netbeans.velocity.jcclexer.node.ASTReference;
 import com.erudika.netbeans.velocity.jcclexer.node.ASTSetDirective;
 import com.erudika.netbeans.velocity.jcclexer.node.SimpleNode;
 import com.erudika.netbeans.velocity.jcclexer.node.VelocityAnalyser;
-import com.erudika.netbeans.velocity.jcclexer.SimpleCharStream;
 import java.io.ByteArrayInputStream;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.Deque;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -50,13 +48,13 @@ import org.openide.util.Lookup;
 final class VTLCompletionEngine {
 
 	private static final List<DirectiveTemplate> DIRECTIVES = List.of(
+			new DirectiveTemplate("#set", "#set($var = value)", "Variable assignment"),
+			new DirectiveTemplate("#macro", "#macro(name $arg)\n\n#end", "Macro definition"),
 			new DirectiveTemplate("#if", "#if()\n\n#end", "Conditional directive"),
 			new DirectiveTemplate("#else", "#else", "Else branch"),
 			new DirectiveTemplate("#elseif", "#elseif()", "Else-if branch"),
 			new DirectiveTemplate("#end", "#end", "End block"),
 			new DirectiveTemplate("#foreach", "#foreach($item in $list)\n\n#end", "Loop directive"),
-			new DirectiveTemplate("#set", "#set($var = value)", "Variable assignment"),
-			new DirectiveTemplate("#macro", "#macro(name $arg)\n\n#end", "Macro definition"),
 			new DirectiveTemplate("#include", "#include(\"template.vm\")", "Include template"),
 			new DirectiveTemplate("#parse", "#parse(\"template.vm\")", "Parse template"),
 			new DirectiveTemplate("#evaluate", "#evaluate($expr)", "Evaluate expression"),
@@ -98,10 +96,10 @@ final class VTLCompletionEngine {
 			}
 		}
 
-		ArrayList<VTLCompletionProposal> values = new ArrayList<VTLCompletionProposal>(proposals.values());
-		values.sort(Comparator.comparingInt(VTLCompletionProposal::getSortPriority)
-				.thenComparing(VTLCompletionProposal::getName, String.CASE_INSENSITIVE_ORDER));
-		return values;
+//		ArrayList<VTLCompletionProposal> values = new ArrayList<VTLCompletionProposal>(proposals.values().stream().distinct().toList());
+//		values.sort(Comparator.comparingInt(VTLCompletionProposal::getSortPriority)
+//				.thenComparing(VTLCompletionProposal::getName, String.CASE_INSENSITIVE_ORDER));
+		return proposals.values().stream().distinct().toList();
 	}
 
 	static String extractPrefix(String text, int caretOffset) {

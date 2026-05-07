@@ -90,9 +90,9 @@ public class VelocityParserTokenManager implements VelocityParserConstants {
 
         final Hashtable<String, Integer> h = new Hashtable<String, Integer>();
 
-        h.put("lexstate", new Integer( curLexState ) );
-        h.put("lparen", new Integer( lparen ));
-        h.put("rparen", new Integer( rparen ));
+        h.put("lexstate", Integer.valueOf(curLexState ) );
+        h.put("lparen", Integer.valueOf( lparen ));
+        h.put("rparen", Integer.valueOf( rparen ));
 
         lparen = 0;
 

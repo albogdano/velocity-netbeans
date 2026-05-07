@@ -21,6 +21,7 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.event.KeyEvent;
+import javax.swing.ImageIcon;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Caret;
 import javax.swing.text.Document;
@@ -28,9 +29,13 @@ import javax.swing.text.JTextComponent;
 import org.netbeans.api.editor.completion.Completion;
 import org.netbeans.spi.editor.completion.CompletionTask;
 import org.netbeans.spi.editor.completion.support.CompletionUtilities;
+import org.openide.util.ImageUtilities;
 
 public class VTLCompletionItem implements org.netbeans.spi.editor.completion.CompletionItem {
 
+  ImageIcon fieldIcon =
+        new ImageIcon(ImageUtilities.loadImage("resources/com/erudika/netbeans/velocity/directive.png"));
+  
 	public enum ItemType {
 		DIRECTIVE("d"),
 		REFERENCE("r"),
@@ -93,7 +98,7 @@ public class VTLCompletionItem implements org.netbeans.spi.editor.completion.Com
 
 	@Override
 	public void render(Graphics g, Font defaultFont, Color defaultForeground, Color defaultBackground, int width, int height, boolean selected) {
-		CompletionUtilities.renderHtml(null, getLeftLabelHtml(), getRightLabelHtml(), g, defaultFont,
+		CompletionUtilities.renderHtml(fieldIcon, getLeftLabelHtml(), getRightLabelHtml(), g, defaultFont,
 				(selected ? Color.decode("#be2042") : Color.decode("#f69922")), width, height, selected);
 	}
 

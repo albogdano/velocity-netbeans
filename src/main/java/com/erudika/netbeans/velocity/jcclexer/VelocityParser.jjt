@@ -955,7 +955,7 @@ TOKEN :
 }
 
 
-<DIRECTIVE>
+<DIRECTIVE,REFMOD2>
 TOKEN :
 {
     <MINUS: "-">
@@ -1666,7 +1666,12 @@ void Parameter() #void: {}
  */
 void Method() : {}
 {
-   Identifier() <LPAREN> [ Parameter() ( <COMMA> Parameter() )* ] <REFMOD2_RPAREN>
+   Identifier() <LPAREN> [ Expression() ( <COMMA> Expression() )* ] <REFMOD2_RPAREN>
+}
+
+void Index() #void : {}
+{
+   <LBRACKET> Parameter() <RBRACKET>
 }
 
 void Reference() : {}
@@ -1678,13 +1683,15 @@ void Reference() : {}
       */
       (
          <IDENTIFIER>
-         (LOOKAHEAD(2) <DOT> (LOOKAHEAD(3) Method() | Identifier()))*
+         (Index())*
+         (LOOKAHEAD(2) <DOT> (LOOKAHEAD(3) Method() | Identifier()) (Index())*)*
       )
       |
       (
          <LCURLY>
          <IDENTIFIER>
-         (LOOKAHEAD(2) <DOT> (LOOKAHEAD(3) Method() | Identifier()))*
+         (Index())*
+         (LOOKAHEAD(2) <DOT> (LOOKAHEAD(3) Method() | Identifier()) (Index())*)*
          <RCURLY>
       )
    }
@@ -1769,7 +1776,9 @@ void MacroStatement() : {}
     {
       strMacroName = token.image;
     }
-    (Identifier())* <RPAREN>
+    (
+      Identifier() [<EQUALS> Expression()]
+    )* <RPAREN>
     (Statement())* #Block
     <END>
     {
@@ -1847,7 +1856,7 @@ void ElseIfStatement() : {}
 
 /**
  *  Currently support both types of set :
- *   #set(expr)
+ *   #set($var = expr)
  *   #set expr
  */
 void SetDirective() : {}
@@ -2088,4 +2097,3 @@ void PrimaryExpression() #void : {}
         ------
 
 */
-

@@ -50,8 +50,31 @@
             <folder name="EmbeddingProviders">
                <file name="com-erudika-netbeans-velocity-embedding-HTMLEmbeddingProvider.instance"/>
             </folder>
-            <folder name="Completion">
-               <file name="com-erudika-netbeans-velocity-completion-VTLCompletionProvider.instance"/>
+            <folder name="CompletionProviders">
+               <file name="com-erudika-netbeans-velocity-completion-VTLCompletionProvider.instance">
+                  <attr name="position" intvalue="50"/>
+                  <attr name="instanceOf" stringvalue="org.netbeans.spi.editor.completion.CompletionProvider"/>
+               </file>
+            </folder>
+         </folder>
+         <folder name="html">
+            <folder name="CompletionProviders">
+               <file name="com-erudika-netbeans-velocity-completion-EmbeddedVTLCompletionProvider.instance">
+                  <attr name="position" intvalue="1"/>
+                  <attr name="instanceOf" stringvalue="org.netbeans.spi.editor.completion.CompletionProvider"/>
+               </file>
+            </folder>
+         </folder>
+         <folder name="x-velocity">
+            <folder name="text">
+               <folder name="html">
+                  <folder name="CompletionProviders">
+                     <file name="com-erudika-netbeans-velocity-completion-EmbeddedVTLCompletionProvider.instance">
+                        <attr name="position" intvalue="1"/>
+                        <attr name="instanceOf" stringvalue="org.netbeans.spi.editor.completion.CompletionProvider"/>
+                     </file>
+                  </folder>
+               </folder>
             </folder>
          </folder>
       </folder>

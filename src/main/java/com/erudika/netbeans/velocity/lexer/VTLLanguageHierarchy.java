@@ -10,6 +10,7 @@
 package com.erudika.netbeans.velocity.lexer;
 
 import static com.erudika.netbeans.velocity.jcclexer.VelocityParserConstants.*;
+import com.erudika.netbeans.velocity.embedding.HTMLEmbeddingSupport;
 import com.erudika.netbeans.velocity.parser.VTLParser;
 import java.util.Arrays;
 import java.util.Collection;
@@ -169,7 +170,7 @@ public class VTLLanguageHierarchy extends LanguageHierarchy<VTLTokenId>
     */
    @Override protected LanguageEmbedding<?> embedding(final Token<VTLTokenId> token, final LanguagePath languagePath, final InputAttributes inputAttributes)
    {
-      if ("TEXT".equals(token.id().name()))
+      if ("TEXT".equals(token.id().name()) && HTMLEmbeddingSupport.mayContainHtmlMarkup(token.text()))
       {
          final Language<?> htmlLang = Language.find("text/html");
          if (htmlLang != null)

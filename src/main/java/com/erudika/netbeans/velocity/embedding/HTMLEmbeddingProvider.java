@@ -66,7 +66,7 @@ public class HTMLEmbeddingProvider extends EmbeddingProvider
 
                         final CharSequence fullText = snapshot.getText();
                         final CharSequence text = fullText.subSequence(offset, offset + length);
-                        if (containsHtmlContent(text))
+                        if (HTMLEmbeddingSupport.containsHtmlContent(text))
                         {
                             embeddings.add(snapshot.create(offset, length, TARGET_MIME_TYPE));
                         }
@@ -88,24 +88,6 @@ public class HTMLEmbeddingProvider extends EmbeddingProvider
             return Collections.singletonList(Embedding.create(embeddings));
         }
     }
-
-    /**
-     * Heuristic check to determine if the given text contains HTML-like content.
-     * This prevents treating pure whitespace or plain text as HTML.
-     */
-    private boolean containsHtmlContent(final CharSequence text)
-    {
-        for (int i = 0; i < text.length(); i++)
-        {
-            final char c = text.charAt(i);
-            if (c == '<' || c == '>' || c == '&' || c == '"' || c == '\'')
-            {
-                return true;
-            }
-        }
-        return false;
-    }
-
     /**
      * {@inheritDoc}
      */

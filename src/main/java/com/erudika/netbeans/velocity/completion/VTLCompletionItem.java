@@ -47,22 +47,10 @@ public class VTLCompletionItem implements org.netbeans.spi.editor.completion.Com
 		}
 	}
 
-	private final String name;
-	private final String insertText;
-	private final String description;
-	private final ItemType type;
-	private final int sortPriority;
+	private final VTLCompletionProposal proposal;
 
-	public VTLCompletionItem(String name, String insertText, String description, ItemType type, int sortPriority) {
-		this.name = name;
-		this.insertText = insertText;
-		this.description = description;
-		this.type = type;
-		this.sortPriority = sortPriority;
-	}
-
-	public VTLCompletionItem(String name, String description, ItemType type, int sortPriority) {
-		this(name, name, description, type, sortPriority);
+	public VTLCompletionItem(VTLCompletionProposal proposal) {
+		this.proposal = proposal;
 	}
 
 	@Override
@@ -70,19 +58,15 @@ public class VTLCompletionItem implements org.netbeans.spi.editor.completion.Com
 		try {
 			Document doc = component.getDocument();
 			Caret caret = component.getCaret();
-			int dotPos = caret.getDot();
-			String text = component.getText(0, dotPos);
-			String prefix = extractPrefix(text);
-			int startOffset = dotPos - prefix.length();
+			int startOffset = proposal.getReplaceOffset();
+			doc.remove(startOffset, proposal.getReplaceLength());
+			doc.insertString(startOffset, proposal.getInsertText(), null);
 
-			doc.remove(startOffset, prefix.length());
-			doc.insertString(startOffset, insertText, null);
-
-			if (insertText.contains("(")) {
-				int parenPos = startOffset + insertText.indexOf('(') + 1;
+			if (proposal.getInsertText().contains("(")) {
+				int parenPos = startOffset + proposal.getInsertText().indexOf('(') + 1;
 				caret.setDot(parenPos);
 			} else {
-				caret.setDot(startOffset + insertText.length());
+				caret.setDot(startOffset + proposal.getInsertText().length());
 			}
 
 			Completion.get().hideAll();
@@ -93,17 +77,17 @@ public class VTLCompletionItem implements org.netbeans.spi.editor.completion.Com
 
 	@Override
 	public int getSortPriority() {
-		return sortPriority;
+		return proposal.getSortPriority();
 	}
 
 	@Override
 	public CharSequence getSortText() {
-		return name;
+		return proposal.getName();
 	}
 
 	@Override
 	public CharSequence getInsertPrefix() {
-		return insertText;
+		return proposal.getName();
 	}
 
 	@Override
@@ -112,7 +96,9 @@ public class VTLCompletionItem implements org.netbeans.spi.editor.completion.Com
 		g.fillRect(0, 0, width, height);
 		g.setColor(defaultForeground);
 		g.setFont(defaultFont);
-		g.drawString(name + " - " + (description != null ? description : ""), 5, height - 5);
+		String text = proposal.getName() + " - " + (proposal.getDescription() != null ? proposal.getDescription() : "");
+		g.drawString(text, 5, height - 5);
+//		CompletionUtilities.renderHtml(null, text, null, g, defaultFont, (selected ? Color.white : Color.ORANGE), width, height, selected);
 	}
 
 	@Override
@@ -127,7 +113,7 @@ public class VTLCompletionItem implements org.netbeans.spi.editor.completion.Com
 
 	@Override
 	public int getPreferredWidth(Graphics g, Font font) {
-		return g.getFontMetrics(font).stringWidth(name + "  " + description);
+		return g.getFontMetrics(font).stringWidth(proposal.getName() + "  " + proposal.getDescription());
 	}
 
 	@Override
@@ -140,33 +126,18 @@ public class VTLCompletionItem implements org.netbeans.spi.editor.completion.Com
 	public void processKeyEvent(KeyEvent evt) {
 	}
 
-	private String extractPrefix(String textBefore) {
-		StringBuilder sb = new StringBuilder();
-		int pos = textBefore.length() - 1;
-		while (pos >= 0) {
-			char ch = textBefore.charAt(pos);
-			if (Character.isJavaIdentifierPart(ch) || ch == '#' || ch == '$') {
-				sb.insert(0, ch);
-				pos--;
-			} else {
-				break;
-			}
-		}
-		return sb.toString();
-	}
-
 	private String getLabelHtml() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("<html>");
 		sb.append("<font color='#0066cc'>");
-		sb.append(type.getLabel());
+		sb.append(proposal.getType().getLabel());
 		sb.append("</font> ");
 		sb.append("<b>");
-		sb.append(name);
+		sb.append(proposal.getName());
 		sb.append("</b>");
-		if (description != null && !description.isEmpty()) {
+		if (proposal.getDescription() != null && !proposal.getDescription().isEmpty()) {
 			sb.append(" <font color='#666666'>- ");
-			sb.append(description);
+			sb.append(proposal.getDescription());
 			sb.append("</font>");
 		}
 		sb.append("</html>");

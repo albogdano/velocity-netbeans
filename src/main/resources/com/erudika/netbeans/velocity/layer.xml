@@ -59,7 +59,7 @@
          </folder>
          <folder name="html">
             <folder name="CompletionProviders">
-               <file name="com-erudika-netbeans-velocity-completion-EmbeddedVTLCompletionProvider.instance">
+               <file name="com-erudika-netbeans-velocity-completion-VTLCompletionProvider.instance">
                   <attr name="position" intvalue="1"/>
                   <attr name="instanceOf" stringvalue="org.netbeans.spi.editor.completion.CompletionProvider"/>
                </file>
@@ -72,7 +72,7 @@
                      <file name="org-netbeans-modules-html-editor-HtmlBracesMatching.instance_hidden"/>
                   </folder>
                   <folder name="CompletionProviders">
-                     <file name="com-erudika-netbeans-velocity-completion-EmbeddedVTLCompletionProvider.instance">
+                     <file name="com-erudika-netbeans-velocity-completion-VTLCompletionProvider.instance">
                         <attr name="position" intvalue="1"/>
                         <attr name="instanceOf" stringvalue="org.netbeans.spi.editor.completion.CompletionProvider"/>
                      </file>

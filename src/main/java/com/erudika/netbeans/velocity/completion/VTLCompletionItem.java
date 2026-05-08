@@ -123,7 +123,7 @@ public class VTLCompletionItem implements org.netbeans.spi.editor.completion.Com
 
 	@Override
 	public int getPreferredWidth(Graphics g, Font font) {
-		return g.getFontMetrics(font).stringWidth(proposal.getName() + "  " + proposal.getDescription()) + 100;
+		return g.getFontMetrics(font).stringWidth(proposal.getName() + "  " + proposal.getDescription() + "      ");
 	}
 
 	@Override
@@ -138,26 +138,26 @@ public class VTLCompletionItem implements org.netbeans.spi.editor.completion.Com
 
 	private String getLeftLabelHtml(Color defaultForeground) {
 		StringBuilder sb = new StringBuilder();
-		sb.append("<html>");
+//		sb.append("<html>");
 //		sb.append("<font color='#0066cc'>");
 //		sb.append(proposal.getType().getLabel());
 //		sb.append("</font> ");
 		sb.append("<b>");
 		sb.append(proposal.getName());
 		sb.append("</b>");
-		sb.append("</html>");
+//		sb.append("</html>");
 		return sb.toString();
 	}
 
 	private String getRightLabelHtml(Color defaultForeground) {
 		StringBuilder sb = new StringBuilder();
-		sb.append("<html>");
+//		sb.append("<html>");
 		if (proposal.getDescription() != null && !proposal.getDescription().isEmpty()) {
 			sb.append(" <font color='#").append(Integer.toHexString(defaultForeground.getRGB()).substring(2)).append("'>");
 			sb.append(proposal.getDescription());
 			sb.append("</font>");
 		}
-		sb.append("</html>");
+//		sb.append("</html>");
 		return sb.toString();
 	}
 

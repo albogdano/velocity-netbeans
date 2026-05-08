@@ -127,6 +127,11 @@
 		</dependency>
 		<dependency>
 			<groupId>org.netbeans.api</groupId>
+			<artifactId>org-openide-util-ui</artifactId>
+			<version>${nbVer}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.netbeans.api</groupId>
 			<artifactId>org-openide-util</artifactId>
 			<version>${nbVer}</version>
 		</dependency>

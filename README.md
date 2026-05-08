@@ -1,4 +1,7 @@
-# VTL (Velocity Template Language) Plugin for Apache NetBeans
+<h1 align="center">
+  <img width="125" height="125" src="https://upload.wikimedia.org/wikipedia/commons/c/cb/Apache_Velocity_logo.svg">
+  <br>Velocity Plugin for Apache NetBeans</br>
+</h1>
 
 > This project is a fork of the original [Velocity Editor](https://sourceforge.net/projects/velocity-editor/) plugin by Werner Jäger (T-Systems International GmbH), updated and extended with modern features for current NetBeans releases.
 

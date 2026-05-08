@@ -43,7 +43,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import org.openide.filesystems.FileObject;
-import org.openide.util.Lookup;
+import org.openide.util.lookup.Lookups;
 
 final class VTLCompletionEngine {
 
@@ -85,7 +85,7 @@ final class VTLCompletionEngine {
 			return List.of();
 		}
 
-		TemplateSymbols symbols = collectSymbols(text);
+		TemplateSymbols symbols = collectSymbols(text, fileObject);
 		LinkedHashMap<String, VTLCompletionProposal> proposals = new LinkedHashMap<String, VTLCompletionProposal>();
 
 		switch (context.mode()) {
@@ -176,7 +176,7 @@ final class VTLCompletionEngine {
 			}
 		}
 
-		for (VelocityContextSymbolProvider provider : Lookup.getDefault().lookupAll(VelocityContextSymbolProvider.class)) {
+		for (VelocityContextSymbolProvider provider : Lookups.forPath("Services/VelocityContextSymbolProviders").lookupAll(VelocityContextSymbolProvider.class)) {
 			Collection<VelocityContextSymbol> provided = provider.getSymbols(fileObject);
 			if (provided == null) {
 				continue;
@@ -247,7 +247,7 @@ final class VTLCompletionEngine {
 		}
 	}
 
-	private static TemplateSymbols collectSymbols(String text) {
+	private static TemplateSymbols collectSymbols(String text, FileObject fileObject) {
 		VelocityParser parser = new VelocityParser();
 		parser.addDirective("parse", new Directive(Directive.LINE));
 		parser.addDirective("evaluate", new Directive(Directive.LINE));
@@ -266,6 +266,14 @@ final class VTLCompletionEngine {
 			// Completion should degrade gracefully if the document is mid-edit.
 		}
 		collectLexicalSymbols(text, symbols);
+
+		// Load macros from configured macro library files
+		if (fileObject != null) {
+			for (MacroLibraryScanner.MacroInfo macro : MacroLibraryScanner.getMacros(fileObject)) {
+				symbols.macros.add(macro.name());
+			}
+		}
+
 		return symbols;
 	}
 

@@ -1,0 +1,31 @@
+Manifest-Version: 1.0
+Created-By: Maven JAR Plugin 3.5.0
+Java-Version: 21
+Build-Jdk-Spec: 25
+OpenIDE-Module: com.erudika.netbeans.velocity
+OpenIDE-Module-Layer: com/erudika/netbeans/velocity/layer.xml
+OpenIDE-Module-Localizing-Bundle: com/erudika/netbeans/velocity/Bundle.p
+ roperties
+OpenIDE-Module-Specification-Version: 2.2.5
+OpenIDE-Module-Implementation-Version: 1.0.0-20260508
+OpenIDE-Module-Build-Version: 202605081826
+OpenIDE-Module-Public-Packages: -
+OpenIDE-Module-Requires: org.openide.modules.ModuleFormat1
+OpenIDE-Module-Module-Dependencies: org.netbeans.modules.editor/3 > 1.11
+ 7.0.6.3.23.55, org.netbeans.modules.editor.completion/1 > 1.75.0.2, org
+ .netbeans.api.annotations.common/1 > 1.58, org.netbeans.modules.java.so
+ urce > 0.195.0.32.4.3.6.1, org.netbeans.modules.java.source.base > 2.80
+ .0.6.4.3.8.1, org.netbeans.modules.options.api/1 > 1.75, org.netbeans.m
+ odules.projectapi/1 > 1.102, org.netbeans.api.java/1 > 1.97, org.netbea
+ ns.modules.editor.bracesmatching/0 > 1.69.0.55, org.netbeans.modules.ed
+ itor.errorstripe.api/1 > 2.62.0.1, org.netbeans.modules.editor.fold/1 >
+  1.75, org.netbeans.modules.editor.lib/3 > 4.37.0.23.3.55, org.netbeans
+ .modules.editor.lib2/1 > 2.50.0.55.3, org.netbeans.modules.java.editor.
+ lib/1 > 1.60.0.12, org.netbeans.modules.lexer/2 > 1.93.0.1, org.netbean
+ s.modules.html.lexer/1 > 1.68, org.netbeans.modules.parsing.api/1 > 9.3
+ 7.0.8, org.netbeans.spi.editor.hints/0 > 1.72.0.8.55, org.openide.awt >
+  7.98, org.openide.filesystems > 9.43, org.openide.loaders > 7.100, org
+ .openide.modules > 7.78, org.openide.nodes > 7.75, org.openide.text > 6
+ .99, org.openide.util.ui > 9.39, org.openide.util > 9.38, org.openide.u
+ til.lookup > 8.64, org.openide.windows > 6.107
+

@@ -26,10 +26,8 @@ import org.openide.util.Lookup;
  *
  * @author <a href="mailto:werner.jaeger@t-systems.com">Werner Jaeger</a>
  */
-//@DataObject.Registration(
-//		mimeType = VelocityLanguage.VTL_MIME_TYPE,
-//		iconBase = "com/erudika/netbeans/velocity/VelocityFiles16.png",
-//		displayName = "#LBL_VTLEditorTab")
+//@MIMEResolver.ExtensionRegistration(displayName = "#LBL_VTL_loader_name", extension = {"vm", "vsl"}, mimeType = "text/x-velocity", position = 1309)
+//@Registration(mimeType = "text/x-velocity", iconBase = "com/erudika/netbeans/velocity/VelocityFiles16.png", displayName = "#LBL_VTL_loader_name")
 public class VTLDataObject extends MultiDataObject {
 
 	private static final long serialVersionUID = 1L;

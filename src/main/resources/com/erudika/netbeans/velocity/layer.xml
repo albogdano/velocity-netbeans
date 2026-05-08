@@ -161,6 +161,33 @@
             <attr name="position" intvalue="1309"/>
          </file>
       </folder>
+      <folder name="VelocityContextSymbolProviders">
+         <file name="com-erudika-netbeans-velocity-completion-JavaDerivedContextSymbolProvider.instance">
+            <attr name="instanceCreate" methodvalue="com.erudika.netbeans.velocity.completion.JavaDerivedContextSymbolProvider.create"/>
+            <attr name="instanceOf" stringvalue="com.erudika.netbeans.velocity.completion.VelocityContextSymbolProvider"/>
+         </file>
+         <file name="com-erudika-netbeans-velocity-completion-ConfiguredVelocityContextSymbolProvider.instance">
+            <attr name="instanceCreate" methodvalue="com.erudika.netbeans.velocity.completion.ConfiguredVelocityContextSymbolProvider.create"/>
+            <attr name="instanceOf" stringvalue="com.erudika.netbeans.velocity.completion.VelocityContextSymbolProvider"/>
+         </file>
+      </folder>
+   </folder>
+   <folder name="OptionsDialog">
+      <folder name="Editor">
+         <file name="VelocityContext.instance">
+            <attr name="instanceCreate" methodvalue="org.netbeans.spi.options.AdvancedOption.createSubCategory"/>
+            <attr name="controller" methodvalue="com.erudika.netbeans.velocity.options.VTLContextOptionsPanelController.create"/>
+            <attr name="displayName" bundlevalue="com.erudika.netbeans.velocity.Bundle#AdvancedOption_DisplayName_VelocityContext"/>
+            <attr name="keywords" bundlevalue="com.erudika.netbeans.velocity.Bundle#AdvancedOption_Keywords_VelocityContext"/>
+            <attr name="keywordsCategory" stringvalue="Editor/VelocityContext"/>
+            <attr name="position" intvalue="800"/>
+         </file>
+      </folder>
+      <folder name="PreviewExamples">
+         <folder name="text">
+            <file name="x-velocity" url="VelocityExample.vm"/>
+         </folder>
+      </folder>
    </folder>
    <folder name="Templates">
       <folder name="Other">
@@ -174,13 +201,6 @@
             <attr name="template" boolvalue="true"/>
 						<attr name="position" intvalue="21"/>
          </file>
-      </folder>
-   </folder>
-   <folder name="OptionsDialog">
-      <folder name="PreviewExamples">
-         <folder name="text">
-            <file name="x-velocity" url="VelocityExample.vm"/>
-         </folder>
       </folder>
    </folder>
 </filesystem>

@@ -19,10 +19,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import org.openide.filesystems.FileObject;
-import org.openide.util.lookup.ServiceProvider;
 
-@ServiceProvider(service = VelocityContextSymbolProvider.class)
 public class ConfiguredVelocityContextSymbolProvider implements VelocityContextSymbolProvider {
+
+	public static ConfiguredVelocityContextSymbolProvider create() {
+		return new ConfiguredVelocityContextSymbolProvider();
+	}
 
 	@Override
 	public Collection<VelocityContextSymbol> getSymbols(FileObject fileObject) {

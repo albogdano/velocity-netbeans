@@ -24,9 +24,31 @@ import org.openide.util.NbPreferences;
 public final class VTLCompletionSettings {
 
 	static final String CONTEXT_SYMBOLS_KEY = "completion.external.symbols";
+	static final String MACRO_LIBRARY_KEY = "completion.macro.library";
 	private static volatile Set<String> overrideSymbols;
+	private static volatile String overrideMacroLibrary;
 
 	private VTLCompletionSettings() {
+	}
+
+	public static String getConfiguredMacroLibrary() {
+		if (overrideMacroLibrary != null) {
+			return overrideMacroLibrary;
+		}
+		try {
+			return preferences().get(MACRO_LIBRARY_KEY, "VM_global_library.vm");
+		} catch (Throwable ex) {
+			return "";
+		}
+	}
+
+	public static void setConfiguredMacroLibrary(String value) {
+		overrideMacroLibrary = (value != null && !value.isEmpty()) ? value : null;
+		try {
+			preferences().put(MACRO_LIBRARY_KEY, value != null ? value : "");
+		} catch (Throwable ex) {
+			// Ignore
+		}
 	}
 
 	public static Set<String> getConfiguredSymbols() {
@@ -61,6 +83,11 @@ public final class VTLCompletionSettings {
 			}
 		}
 		overrideSymbols = new LinkedHashSet<String>(values);
+		try {
+			preferences().put(CONTEXT_SYMBOLS_KEY, String.join("\n", values));
+		} catch (Throwable ex) {
+			// Ignore
+		}
 	}
 
 	private static Preferences preferences() {

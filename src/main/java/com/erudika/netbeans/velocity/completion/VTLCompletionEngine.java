@@ -374,7 +374,7 @@ final class VTLCompletionEngine {
 		StringBuilder normalized = new StringBuilder("$");
 		while (index < value.length()) {
 			char ch = value.charAt(index);
-			if (Character.isLetterOrDigit(ch) || ch == '_' || ch == '-') {
+			if (Character.isLetterOrDigit(ch) || ch == '_' || ch == '-' || ch == '.') {
 				normalized.append(ch);
 				index++;
 			} else {

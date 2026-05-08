@@ -91,7 +91,7 @@ final class VTLCompletionEngine {
 		switch (context.mode()) {
 			case DIRECTIVE -> addDirectiveProposals(proposals, context, symbols);
 			case REFERENCE -> addReferenceProposals(proposals, context, symbols, fileObject);
-			case FOREACH_IN -> addKeywordProposal(proposals, "in", "Foreach keyword", context, 10);
+			case FOREACH_IN -> addKeywordProposal(proposals, "in", "Keyword", context, 10);
 			case EXPRESSION -> {
 				addReferenceProposals(proposals, context, symbols, fileObject);
 				addKeywordProposals(proposals, context);
@@ -157,8 +157,8 @@ final class VTLCompletionEngine {
 	private static void addReferenceProposals(Map<String, VTLCompletionProposal> proposals, CompletionContext context,
 			TemplateSymbols symbols, FileObject fileObject) {
 		String filter = stripPrefixMarker(context.prefix(), '$');
-		addReferenceSymbols(proposals, symbols.declaredReferences(), "Local variable", 10, filter, context);
-		addReferenceSymbols(proposals, symbols.observedReferences(), "Local reference", 20, filter, context);
+		addReferenceSymbols(proposals, symbols.declaredReferences(), "Variable", 10, filter, context);
+		addReferenceSymbols(proposals, symbols.observedReferences(), "Context variable", 20, filter, context);
 
 		for (VelocityContextSymbol builtIn : BUILT_IN_REFERENCES) {
 			String normalized = normalizeReference(builtIn.name());
@@ -171,7 +171,7 @@ final class VTLCompletionEngine {
 		for (String configuredSymbol : VTLCompletionSettings.getConfiguredSymbols()) {
 			String normalized = normalizeReference(configuredSymbol);
 			if (normalized != null && matches(normalized, filter)) {
-				put(proposals, normalized, new VTLCompletionProposal(normalized, normalized, "Configured context variable",
+				put(proposals, normalized, new VTLCompletionProposal(normalized, normalized, "Context variable",
 						VTLCompletionItem.ItemType.REFERENCE, 30, context.replaceOffset(), context.replaceLength()));
 			}
 		}
@@ -185,7 +185,7 @@ final class VTLCompletionEngine {
 				String normalized = normalizeReference(symbol.name());
 				if (normalized != null && matches(normalized, filter)) {
 					put(proposals, normalized, new VTLCompletionProposal(normalized, normalized,
-							symbol.description() != null ? symbol.description() : "Application context variable",
+							symbol.description() != null ? symbol.description() : "App Context variable",
 							VTLCompletionItem.ItemType.REFERENCE, 30, context.replaceOffset(), context.replaceLength()));
 				}
 			}
@@ -206,7 +206,7 @@ final class VTLCompletionEngine {
 		String filter = context.prefix();
 		for (String keyword : KEYWORDS) {
 			if (matches(keyword, filter)) {
-				put(proposals, keyword, new VTLCompletionProposal(keyword, keyword, "Velocity keyword",
+				put(proposals, keyword, new VTLCompletionProposal(keyword, keyword, "Keyword",
 						VTLCompletionItem.ItemType.KEYWORD, 40, context.replaceOffset(), context.replaceLength()));
 			}
 		}
@@ -216,7 +216,7 @@ final class VTLCompletionEngine {
 		String filter = context.prefix();
 		for (String operator : OPERATORS) {
 			if (filter.isEmpty() || operator.startsWith(filter)) {
-				put(proposals, operator, new VTLCompletionProposal(operator, operator, "Velocity operator",
+				put(proposals, operator, new VTLCompletionProposal(operator, operator, "Operator",
 						VTLCompletionItem.ItemType.OPERATOR, 50, context.replaceOffset(), context.replaceLength()));
 			}
 		}
@@ -226,7 +226,7 @@ final class VTLCompletionEngine {
 		String filter = context.prefix();
 		for (String value : BOOLEANS) {
 			if (matches(value, filter)) {
-				put(proposals, value, new VTLCompletionProposal(value, value, "Boolean literal",
+				put(proposals, value, new VTLCompletionProposal(value, value, "Boolean",
 						VTLCompletionItem.ItemType.KEYWORD, 45, context.replaceOffset(), context.replaceLength()));
 			}
 		}

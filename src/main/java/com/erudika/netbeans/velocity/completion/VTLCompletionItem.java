@@ -43,6 +43,10 @@ public class VTLCompletionItem implements org.netbeans.spi.editor.completion.Com
 	ImageIcon varOrangeIco = new ImageIcon(ImageUtilities.loadImage("com/erudika/netbeans/velocity/var-orange.png"));
 	ImageIcon operatorIco = new ImageIcon(ImageUtilities.loadImage("com/erudika/netbeans/velocity/operator.png"));
 
+	Color blue = Color.decode("#007dda");
+	Color orange = Color.decode("#e89500");
+	Color darkorange = Color.decode("#e3662a");
+
 	public enum ItemType {
 		DIRECTIVE("d"),
 		REFERENCE("r"),
@@ -177,6 +181,22 @@ public class VTLCompletionItem implements org.netbeans.spi.editor.completion.Com
 	}
 
 	private Color getColor(Color defaultForeground, boolean selected) {
-		return (selected ? defaultForeground : Color.decode("#f69922"));
+		if (selected) {
+			return defaultForeground;
+		} else {
+			switch (proposal.getType()) {
+				case DIRECTIVE:
+					return proposal.getDescription().contains("Velocimacro") ? orange : blue;
+				case KEYWORD:
+					return darkorange;
+				case OPERATOR:
+					return defaultForeground;
+				case REFERENCE:
+					return orange;
+				default:
+					return defaultForeground;
+			}
+		}
+//		return (selected ? defaultForeground : Color.decode("#f69922"));
 	}
 }

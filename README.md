@@ -1,5 +1,5 @@
 <h1 align="center">
-  <img width="125" height="125" src="https://upload.wikimedia.org/wikipedia/commons/c/cb/Apache_Velocity_logo.svg">
+  <img src="https://upload.wikimedia.org/wikipedia/commons/c/cb/Apache_Velocity_logo.svg">
   <br>Velocity Plugin for Apache NetBeans</br>
 </h1>
 

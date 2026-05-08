@@ -34,9 +34,11 @@ import org.openide.util.ImageUtilities;
 public class VTLCompletionItem implements org.netbeans.spi.editor.completion.CompletionItem {
 
 	ImageIcon hashBlackIco = new ImageIcon(ImageUtilities.loadImage("com/erudika/netbeans/velocity/hash-black.png"));
+	ImageIcon hashWhiteIco = new ImageIcon(ImageUtilities.loadImage("com/erudika/netbeans/velocity/hash-white.png"));
 	ImageIcon hashBlueIco = new ImageIcon(ImageUtilities.loadImage("com/erudika/netbeans/velocity/hash-blue.png"));
 	ImageIcon hashDBlueIco = new ImageIcon(ImageUtilities.loadImage("com/erudika/netbeans/velocity/hash-dblue.png"));
 	ImageIcon hashOrangeIco = new ImageIcon(ImageUtilities.loadImage("com/erudika/netbeans/velocity/hash-orange.png"));
+	ImageIcon macroWhiteIco = new ImageIcon(ImageUtilities.loadImage("com/erudika/netbeans/velocity/macro-white.png"));
 	ImageIcon macroBlueIco = new ImageIcon(ImageUtilities.loadImage("com/erudika/netbeans/velocity/macro-blue.png"));
 	ImageIcon macroOrangeIco = new ImageIcon(ImageUtilities.loadImage("com/erudika/netbeans/velocity/macro-orange.png"));
 	ImageIcon varBlueIco = new ImageIcon(ImageUtilities.loadImage("com/erudika/netbeans/velocity/var-blue.png"));
@@ -111,7 +113,7 @@ public class VTLCompletionItem implements org.netbeans.spi.editor.completion.Com
 
 	@Override
 	public void render(Graphics g, Font defaultFont, Color defaultForeground, Color defaultBackground, int width, int height, boolean selected) {
-		CompletionUtilities.renderHtml(getIcon(), getLeftLabelHtml(defaultForeground), getRightLabelHtml(defaultForeground),
+		CompletionUtilities.renderHtml(getIcon(selected), getLeftLabelHtml(defaultForeground), getRightLabelHtml(defaultForeground),
 				g, defaultFont, getColor(defaultForeground, selected), width, height, selected);
 	}
 
@@ -165,16 +167,19 @@ public class VTLCompletionItem implements org.netbeans.spi.editor.completion.Com
 		return sb.toString();
 	}
 
-	private ImageIcon getIcon() {
+	private ImageIcon getIcon(boolean selected) {
+		String desc = proposal.getDescription().toLowerCase();
 		switch (proposal.getType()) {
 			case DIRECTIVE:
-				return proposal.getDescription().contains("Velocimacro") ? hashOrangeIco : hashBlueIco;
+				return proposal.getDescription().contains("Velocimacro") ?
+						(selected ? macroWhiteIco : macroBlueIco) :
+						(selected ? hashWhiteIco : hashBlueIco);
 			case KEYWORD:
-				return hashDBlueIco;
+				return selected ? hashWhiteIco : hashDBlueIco;
 			case OPERATOR:
 				return operatorIco;
 			case REFERENCE:
-				return varOrangeIco;
+				return desc.contains("context variable") || proposal.getInsertText().startsWith("$foreach.") ? varOrangeIco : varBlueIco;
 			default:
 				return macroBlueIco;
 		}
@@ -184,15 +189,16 @@ public class VTLCompletionItem implements org.netbeans.spi.editor.completion.Com
 		if (selected) {
 			return defaultForeground;
 		} else {
+			String desc = proposal.getDescription().toLowerCase();
 			switch (proposal.getType()) {
 				case DIRECTIVE:
-					return proposal.getDescription().contains("Velocimacro") ? orange : blue;
+					return desc.contains("velocimacro") ? orange : blue;
 				case KEYWORD:
 					return darkorange;
 				case OPERATOR:
 					return defaultForeground;
 				case REFERENCE:
-					return orange;
+					return desc.contains("context variable") || proposal.getInsertText().startsWith("$foreach.") ? orange : defaultForeground;
 				default:
 					return defaultForeground;
 			}

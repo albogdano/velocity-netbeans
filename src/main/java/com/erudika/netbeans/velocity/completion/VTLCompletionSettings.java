@@ -25,6 +25,7 @@ public final class VTLCompletionSettings {
 
 	static final String CONTEXT_SYMBOLS_KEY = "completion.external.symbols";
 	static final String MACRO_LIBRARY_KEY = "completion.macro.library";
+	static final String defaultLibraryFile = "VM_global_library.vm";
 	private static volatile Set<String> overrideSymbols;
 	private static volatile String overrideMacroLibrary;
 
@@ -36,16 +37,16 @@ public final class VTLCompletionSettings {
 			return overrideMacroLibrary;
 		}
 		try {
-			return preferences().get(MACRO_LIBRARY_KEY, "VM_global_library.vm");
+			return preferences().get(MACRO_LIBRARY_KEY, defaultLibraryFile);
 		} catch (Throwable ex) {
 			return "";
 		}
 	}
 
 	public static void setConfiguredMacroLibrary(String value) {
-		overrideMacroLibrary = (value != null && !value.isEmpty()) ? value : null;
+		overrideMacroLibrary = (value != null && !value.isEmpty()) ? value : defaultLibraryFile;
 		try {
-			preferences().put(MACRO_LIBRARY_KEY, value != null ? value : "");
+			preferences().put(MACRO_LIBRARY_KEY, value != null ? value : defaultLibraryFile);
 		} catch (Throwable ex) {
 			// Ignore
 		}

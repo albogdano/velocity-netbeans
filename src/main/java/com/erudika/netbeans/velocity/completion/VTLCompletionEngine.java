@@ -158,7 +158,7 @@ final class VTLCompletionEngine {
 			TemplateSymbols symbols, FileObject fileObject) {
 		String filter = stripPrefixMarker(context.prefix(), '$');
 		addReferenceSymbols(proposals, symbols.declaredReferences(), "Variable", 10, filter, context);
-		addReferenceSymbols(proposals, symbols.observedReferences(), "Context variable", 20, filter, context);
+		addReferenceSymbols(proposals, symbols.observedReferences(), "Local variable", 20, filter, context);
 
 		for (VelocityContextSymbol builtIn : BUILT_IN_REFERENCES) {
 			String normalized = normalizeReference(builtIn.name());

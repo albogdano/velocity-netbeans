@@ -33,9 +33,16 @@ import org.openide.util.ImageUtilities;
 
 public class VTLCompletionItem implements org.netbeans.spi.editor.completion.CompletionItem {
 
-  ImageIcon fieldIcon =
-        new ImageIcon(ImageUtilities.loadImage("resources/com/erudika/netbeans/velocity/directive.png"));
-  
+	ImageIcon hashBlackIco = new ImageIcon(ImageUtilities.loadImage("com/erudika/netbeans/velocity/hash-black.png"));
+	ImageIcon hashBlueIco = new ImageIcon(ImageUtilities.loadImage("com/erudika/netbeans/velocity/hash-blue.png"));
+	ImageIcon hashDBlueIco = new ImageIcon(ImageUtilities.loadImage("com/erudika/netbeans/velocity/hash-dblue.png"));
+	ImageIcon hashOrangeIco = new ImageIcon(ImageUtilities.loadImage("com/erudika/netbeans/velocity/hash-orange.png"));
+	ImageIcon macroBlueIco = new ImageIcon(ImageUtilities.loadImage("com/erudika/netbeans/velocity/macro-blue.png"));
+	ImageIcon macroOrangeIco = new ImageIcon(ImageUtilities.loadImage("com/erudika/netbeans/velocity/macro-orange.png"));
+	ImageIcon varBlueIco = new ImageIcon(ImageUtilities.loadImage("com/erudika/netbeans/velocity/var-blue.png"));
+	ImageIcon varOrangeIco = new ImageIcon(ImageUtilities.loadImage("com/erudika/netbeans/velocity/var-orange.png"));
+	ImageIcon operatorIco = new ImageIcon(ImageUtilities.loadImage("com/erudika/netbeans/velocity/operator.png"));
+
 	public enum ItemType {
 		DIRECTIVE("d"),
 		REFERENCE("r"),
@@ -71,6 +78,8 @@ public class VTLCompletionItem implements org.netbeans.spi.editor.completion.Com
 			if (proposal.getInsertText().contains("(")) {
 				int parenPos = startOffset + proposal.getInsertText().indexOf('(') + 1;
 				caret.setDot(parenPos);
+			} else if (proposal.getInsertText().contains("#*")) {
+				caret.setDot(startOffset + 3);
 			} else {
 				caret.setDot(startOffset + proposal.getInsertText().length());
 			}
@@ -98,8 +107,8 @@ public class VTLCompletionItem implements org.netbeans.spi.editor.completion.Com
 
 	@Override
 	public void render(Graphics g, Font defaultFont, Color defaultForeground, Color defaultBackground, int width, int height, boolean selected) {
-		CompletionUtilities.renderHtml(fieldIcon, getLeftLabelHtml(), getRightLabelHtml(), g, defaultFont,
-				(selected ? Color.decode("#be2042") : Color.decode("#f69922")), width, height, selected);
+		CompletionUtilities.renderHtml(getIcon(), getLeftLabelHtml(defaultForeground), getRightLabelHtml(defaultForeground),
+				g, defaultFont, getColor(defaultForeground, selected), width, height, selected);
 	}
 
 	@Override
@@ -114,7 +123,7 @@ public class VTLCompletionItem implements org.netbeans.spi.editor.completion.Com
 
 	@Override
 	public int getPreferredWidth(Graphics g, Font font) {
-		return g.getFontMetrics(font).stringWidth(proposal.getName() + "  " + proposal.getDescription());
+		return g.getFontMetrics(font).stringWidth(proposal.getName() + "  " + proposal.getDescription()) + 100;
 	}
 
 	@Override
@@ -127,28 +136,47 @@ public class VTLCompletionItem implements org.netbeans.spi.editor.completion.Com
 	public void processKeyEvent(KeyEvent evt) {
 	}
 
-	private String getLeftLabelHtml() {
+	private String getLeftLabelHtml(Color defaultForeground) {
 		StringBuilder sb = new StringBuilder();
-//		sb.append("<html>");
-		sb.append("<font color='#0066cc'>");
-		sb.append(proposal.getType().getLabel());
-		sb.append("</font> ");
+		sb.append("<html>");
+//		sb.append("<font color='#0066cc'>");
+//		sb.append(proposal.getType().getLabel());
+//		sb.append("</font> ");
 		sb.append("<b>");
 		sb.append(proposal.getName());
 		sb.append("</b>");
-//		sb.append("</html>");
+		sb.append("</html>");
 		return sb.toString();
 	}
 
-	private String getRightLabelHtml() {
+	private String getRightLabelHtml(Color defaultForeground) {
 		StringBuilder sb = new StringBuilder();
-//		sb.append("<html>");
+		sb.append("<html>");
 		if (proposal.getDescription() != null && !proposal.getDescription().isEmpty()) {
-			sb.append(" <font color='#CCCCCC'>");
+			sb.append(" <font color='#").append(Integer.toHexString(defaultForeground.getRGB()).substring(2)).append("'>");
 			sb.append(proposal.getDescription());
 			sb.append("</font>");
 		}
-//		sb.append("</html>");
+		sb.append("</html>");
 		return sb.toString();
+	}
+
+	private ImageIcon getIcon() {
+		switch (proposal.getType()) {
+			case DIRECTIVE:
+				return proposal.getDescription().contains("Velocimacro") ? hashOrangeIco : hashBlueIco;
+			case KEYWORD:
+				return hashDBlueIco;
+			case OPERATOR:
+				return operatorIco;
+			case REFERENCE:
+				return varOrangeIco;
+			default:
+				return macroBlueIco;
+		}
+	}
+
+	private Color getColor(Color defaultForeground, boolean selected) {
+		return (selected ? defaultForeground : Color.decode("#f69922"));
 	}
 }

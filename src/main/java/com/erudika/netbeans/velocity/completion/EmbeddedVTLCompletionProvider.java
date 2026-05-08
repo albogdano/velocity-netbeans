@@ -8,7 +8,6 @@
 package com.erudika.netbeans.velocity.completion;
 
 import javax.swing.text.JTextComponent;
-import org.netbeans.spi.editor.completion.CompletionProvider;
 import org.netbeans.spi.editor.completion.CompletionTask;
 
 /**

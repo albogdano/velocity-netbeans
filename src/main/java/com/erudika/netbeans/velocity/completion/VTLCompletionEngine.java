@@ -49,7 +49,7 @@ final class VTLCompletionEngine {
 
 	private static final List<DirectiveTemplate> DIRECTIVES = List.of(
 			new DirectiveTemplate("#set", "#set($var = value)", "Variable assignment"),
-			new DirectiveTemplate("#macro", "#macro(name $arg)\n\n#end", "Macro definition"),
+			new DirectiveTemplate("#macro", "#macro( $arg)\n\n#end", "Macro definition"),
 			new DirectiveTemplate("#if", "#if()\n\n#end", "Conditional directive"),
 			new DirectiveTemplate("#else", "#else", "Else branch"),
 			new DirectiveTemplate("#elseif", "#elseif()", "Else-if branch"),
@@ -59,14 +59,22 @@ final class VTLCompletionEngine {
 			new DirectiveTemplate("#parse", "#parse(\"template.vm\")", "Parse template"),
 			new DirectiveTemplate("#evaluate", "#evaluate($expr)", "Evaluate expression"),
 			new DirectiveTemplate("#define", "#define($var)\n\n#end", "Define block"),
-			new DirectiveTemplate("#stop", "#stop", "Stop rendering"));
+			new DirectiveTemplate("#break", "#break", "Break directive"),
+			new DirectiveTemplate("#stop", "#stop", "Stop rendering"),
+			new DirectiveTemplate("#comment #* .. *#", "#*  *# ", "Comment block")
+	);
 
 	private static final List<String> KEYWORDS = List.of("in", "and", "or", "not", "eq", "ne", "lt", "le", "gt", "ge");
 	private static final List<String> BOOLEANS = List.of("true", "false");
 	private static final List<String> OPERATORS = List.of("!", "&&", "||", "==", "!=", "<", "<=", ">", ">=");
 	private static final List<VelocityContextSymbol> BUILT_IN_REFERENCES = List.of(
-			new VelocityContextSymbol("$velocityCount", "Loop counter"),
-			new VelocityContextSymbol("$velocityHasNext", "Loop hasNext flag"));
+			new VelocityContextSymbol("$foreach.count", "Loop counter"),
+			new VelocityContextSymbol("$foreach.index", "Loop index"),
+			new VelocityContextSymbol("$foreach.first", "Loop first"),
+			new VelocityContextSymbol("$foreach.last", "Loop last"),
+			new VelocityContextSymbol("$foreach.parent", "Loop parent"),
+			new VelocityContextSymbol("$foreach.topmost", "Loop topmost"),
+			new VelocityContextSymbol("$foreach.hasNext", "Loop hasNext flag"));
 
 	private VTLCompletionEngine() {
 	}
@@ -96,9 +104,10 @@ final class VTLCompletionEngine {
 			}
 		}
 
-//		ArrayList<VTLCompletionProposal> values = new ArrayList<VTLCompletionProposal>(proposals.values().stream().distinct().toList());
+//		ArrayList<VTLCompletionProposal> values = new ArrayList<VTLCompletionProposal>(proposals.values());
 //		values.sort(Comparator.comparingInt(VTLCompletionProposal::getSortPriority)
 //				.thenComparing(VTLCompletionProposal::getName, String.CASE_INSENSITIVE_ORDER));
+//		return values;
 		return proposals.values().stream().distinct().toList();
 	}
 
@@ -139,8 +148,8 @@ final class VTLCompletionEngine {
 			String proposalName = "#" + macroName;
 			if (matches(proposalName, filter)) {
 				put(proposals, proposalName,
-						new VTLCompletionProposal(proposalName, proposalName + "()", "Macro defined in this file",
-								VTLCompletionItem.ItemType.DIRECTIVE, 15, context.replaceOffset(), context.replaceLength()));
+						new VTLCompletionProposal(proposalName, proposalName + "()", "Velocimacro",
+								VTLCompletionItem.ItemType.DIRECTIVE, 35, context.replaceOffset(), context.replaceLength()));
 			}
 		}
 	}
@@ -149,7 +158,7 @@ final class VTLCompletionEngine {
 			TemplateSymbols symbols, FileObject fileObject) {
 		String filter = stripPrefixMarker(context.prefix(), '$');
 		addReferenceSymbols(proposals, symbols.declaredReferences(), "Local variable", 10, filter, context);
-		addReferenceSymbols(proposals, symbols.observedReferences(), "Reference from current file", 20, filter, context);
+		addReferenceSymbols(proposals, symbols.observedReferences(), "Local reference", 20, filter, context);
 
 		for (VelocityContextSymbol builtIn : BUILT_IN_REFERENCES) {
 			String normalized = normalizeReference(builtIn.name());

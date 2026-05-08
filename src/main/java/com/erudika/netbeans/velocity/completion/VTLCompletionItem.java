@@ -53,7 +53,9 @@ public class VTLCompletionItem implements org.netbeans.spi.editor.completion.Com
 		DIRECTIVE("d"),
 		REFERENCE("r"),
 		KEYWORD("k"),
-		OPERATOR("o");
+		OPERATOR("o"),
+		PROPERTY("p"),
+		METHOD("m");
 
 		private final String label;
 
@@ -81,13 +83,18 @@ public class VTLCompletionItem implements org.netbeans.spi.editor.completion.Com
 			doc.remove(startOffset, proposal.getReplaceLength());
 			doc.insertString(startOffset, proposal.getInsertText(), null);
 
-			if (proposal.getInsertText().contains("(")) {
-				int parenPos = startOffset + proposal.getInsertText().indexOf('(') + 1;
+			String insertText = proposal.getInsertText();
+			if (insertText.endsWith("()")) {
+				// No-param method or empty parens directive: place caret after ()
+				caret.setDot(startOffset + insertText.length());
+			} else if (insertText.contains("(")) {
+				// Method with params or directive with body: place caret inside parens
+				int parenPos = startOffset + insertText.indexOf('(') + 1;
 				caret.setDot(parenPos);
-			} else if (proposal.getInsertText().contains("#*")) {
+			} else if (insertText.contains("#*")) {
 				caret.setDot(startOffset + 3);
 			} else {
-				caret.setDot(startOffset + proposal.getInsertText().length());
+				caret.setDot(startOffset + insertText.length());
 			}
 
 			Completion.get().hideAll();
@@ -180,6 +187,10 @@ public class VTLCompletionItem implements org.netbeans.spi.editor.completion.Com
 				return operatorIco;
 			case REFERENCE:
 				return desc.contains("context variable") || proposal.getInsertText().startsWith("$foreach.") ? varOrangeIco : varBlueIco;
+			case PROPERTY:
+				return varBlueIco;
+			case METHOD:
+				return selected ? macroWhiteIco : macroBlueIco;
 			default:
 				return macroBlueIco;
 		}
@@ -199,10 +210,13 @@ public class VTLCompletionItem implements org.netbeans.spi.editor.completion.Com
 					return defaultForeground;
 				case REFERENCE:
 					return desc.contains("context variable") || proposal.getInsertText().startsWith("$foreach.") ? orange : defaultForeground;
+				case PROPERTY:
+					return blue;
+				case METHOD:
+					return defaultForeground;
 				default:
 					return defaultForeground;
 			}
 		}
-//		return (selected ? defaultForeground : Color.decode("#f69922"));
 	}
 }

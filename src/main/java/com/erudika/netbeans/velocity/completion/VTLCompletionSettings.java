@@ -16,7 +16,9 @@
 package com.erudika.netbeans.velocity.completion;
 
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.prefs.Preferences;
 import org.openide.util.NbPreferences;
@@ -71,6 +73,45 @@ public final class VTLCompletionSettings {
 			}
 		}
 		return values;
+	}
+
+	/**
+	 * Returns configured type mappings extracted from the configured symbols.
+	 * Symbols in the format "$varName:com.example.Type" produce a mapping
+	 * from "$varName" to "com.example.Type". Symbols without a colon are ignored.
+	 */
+	public static Map<String, String> getConfiguredTypeMappings() {
+		LinkedHashMap<String, String> mappings = new LinkedHashMap<>();
+		for (String symbol : getConfiguredSymbols()) {
+			int colonIdx = symbol.indexOf(':');
+			if (colonIdx > 0 && colonIdx < symbol.length() - 1) {
+				String varName = symbol.substring(0, colonIdx).trim();
+				String typeName = symbol.substring(colonIdx + 1).trim();
+				if (!varName.isEmpty() && !typeName.isEmpty()) {
+					if (!varName.startsWith("$")) {
+						varName = "$" + varName;
+					}
+					mappings.put(varName, typeName);
+				}
+			}
+		}
+		return mappings;
+	}
+
+	/**
+	 * Extracts just the variable name from a configured symbol, stripping any
+	 * type annotation. "$user:com.example.User" returns "$user".
+	 */
+	public static String extractVarName(String configuredSymbol) {
+		if (configuredSymbol == null) {
+			return null;
+		}
+		int colonIdx = configuredSymbol.indexOf(':');
+		String varPart = colonIdx > 0 ? configuredSymbol.substring(0, colonIdx).trim() : configuredSymbol.trim();
+		if (varPart.isEmpty()) {
+			return null;
+		}
+		return varPart.startsWith("$") ? varPart : "$" + varPart;
 	}
 
 	public static void setConfiguredSymbols(Collection<String> symbols) {

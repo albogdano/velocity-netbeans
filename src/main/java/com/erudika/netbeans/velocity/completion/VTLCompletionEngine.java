@@ -81,6 +81,10 @@ final class VTLCompletionEngine {
 
 	static List<VTLCompletionProposal> complete(String text, int caretOffset, FileObject fileObject, boolean allowInCurrentContext) {
 		CompletionContext context = CompletionContext.analyze(text, caretOffset);
+		if (context.mode() == CompletionMode.DOT_MEMBER) {
+			// Dot-completion always allowed when a valid expression is detected
+			return completeDotMember(context, fileObject);
+		}
 		if (!allowInCurrentContext && !context.hasVelocityPrefix()) {
 			return List.of();
 		}
@@ -102,12 +106,9 @@ final class VTLCompletionEngine {
 				addDirectiveProposals(proposals, context, symbols);
 				addReferenceProposals(proposals, context, symbols, fileObject);
 			}
+			default -> { }
 		}
 
-//		ArrayList<VTLCompletionProposal> values = new ArrayList<VTLCompletionProposal>(proposals.values());
-//		values.sort(Comparator.comparingInt(VTLCompletionProposal::getSortPriority)
-//				.thenComparing(VTLCompletionProposal::getName, String.CASE_INSENSITIVE_ORDER));
-//		return values;
 		return proposals.values().stream().distinct().toList();
 	}
 
@@ -238,6 +239,74 @@ final class VTLCompletionEngine {
 			put(proposals, keyword, new VTLCompletionProposal(keyword, keyword, description,
 					VTLCompletionItem.ItemType.KEYWORD, priority, context.replaceOffset(), context.replaceLength()));
 		}
+	}
+
+	private static List<VTLCompletionProposal> completeDotMember(CompletionContext context, FileObject fileObject) {
+		DotExpressionParser.DotExpression dotExpr = context.dotExpression();
+		if (dotExpr == null || fileObject == null) {
+			return List.of();
+		}
+
+		// Resolve the base variable type
+		String baseType = TypeResolver.resolveVariableType(fileObject, dotExpr.baseVar());
+		if (baseType == null) {
+			return List.of();
+		}
+
+		// Walk the method chain to get the final type
+		String finalType;
+		if (dotExpr.methodChain().isEmpty()) {
+			finalType = baseType;
+		} else {
+			finalType = TypeResolver.resolveChain(fileObject, baseType, dotExpr.methodChain());
+		}
+		if (finalType == null) {
+			return List.of();
+		}
+
+		// Get members of the final type
+		List<ResolvedMember> members = TypeResolver.getMembers(fileObject, finalType);
+		if (members.isEmpty()) {
+			return List.of();
+		}
+
+		// Convert to proposals
+		String filter = dotExpr.filter();
+		LinkedHashMap<String, VTLCompletionProposal> proposals = new LinkedHashMap<>();
+		for (ResolvedMember member : members) {
+			if (!matchesMember(member.name(), filter)) {
+				continue;
+			}
+
+			if (member.isProperty()) {
+				String description = member.returnTypeDisplay()
+						+ (member.derivedFrom() != null ? "  \u2190 " + member.derivedFrom() : "");
+				String insertText = member.name();
+				int priority = member.isLowPriority() ? 30 : 5;
+				put(proposals, "p:" + member.name(), new VTLCompletionProposal(
+						member.name(), insertText, description,
+						VTLCompletionItem.ItemType.PROPERTY, priority,
+						context.replaceOffset(), context.replaceLength()));
+			} else if (member.isMethod()) {
+				String description = "\u2192 " + member.returnTypeDisplay();
+				String insertText = member.paramCount() > 0
+						? member.name() + "(" : member.name() + "()";
+				int priority = member.isLowPriority() ? 50 : 20;
+				put(proposals, "m:" + member.displaySignature(), new VTLCompletionProposal(
+						member.displaySignature(), insertText, description,
+						VTLCompletionItem.ItemType.METHOD, priority,
+						context.replaceOffset(), context.replaceLength()));
+			}
+		}
+
+		return proposals.values().stream().distinct().toList();
+	}
+
+	private static boolean matchesMember(String memberName, String filter) {
+		if (filter == null || filter.isEmpty()) {
+			return true;
+		}
+		return memberName.toLowerCase(Locale.ROOT).startsWith(filter.toLowerCase(Locale.ROOT));
 	}
 
 	private static void put(Map<String, VTLCompletionProposal> proposals, String key, VTLCompletionProposal proposal) {
@@ -400,11 +469,12 @@ final class VTLCompletionEngine {
 		REFERENCE,
 		FOREACH_IN,
 		EXPRESSION,
+		DOT_MEMBER,
 		GENERAL
 	}
 
 	private record CompletionContext(String prefix, int replaceOffset, int replaceLength, CompletionMode mode,
-			Integer openBlockKind) {
+			Integer openBlockKind, DotExpressionParser.DotExpression dotExpression) {
 
 		static CompletionContext analyze(String text, int caretOffset) {
 			String prefix = extractPrefix(text, caretOffset);
@@ -412,6 +482,13 @@ final class VTLCompletionEngine {
 			String textBeforeCaret = text.substring(0, caretOffset);
 			String currentLine = extractCurrentLine(textBeforeCaret);
 			Integer openBlockKind = findOpenBlock(textBeforeCaret);
+
+			// Check for dot-completion first (highest specificity)
+			DotExpressionParser.DotExpression dotExpr = DotExpressionParser.parse(textBeforeCaret, caretOffset);
+			if (dotExpr != null) {
+				return new CompletionContext(dotExpr.filter(), dotExpr.replaceOffset(),
+						dotExpr.replaceLength(), CompletionMode.DOT_MEMBER, openBlockKind, dotExpr);
+			}
 
 			CompletionMode mode;
 			if (prefix.startsWith("#")) {
@@ -426,7 +503,7 @@ final class VTLCompletionEngine {
 				mode = CompletionMode.GENERAL;
 			}
 
-			return new CompletionContext(prefix, replaceOffset, prefix.length(), mode, openBlockKind);
+			return new CompletionContext(prefix, replaceOffset, prefix.length(), mode, openBlockKind, null);
 		}
 
 		boolean hasVelocityPrefix() {

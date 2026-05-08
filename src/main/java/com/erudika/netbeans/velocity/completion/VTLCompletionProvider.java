@@ -28,7 +28,7 @@ public class VTLCompletionProvider implements CompletionProvider {
 
 	@Override
 	public int getAutoQueryTypes(JTextComponent component, String typedText) {
-		if ("#".equals(typedText) || "$".equals(typedText)) {
+		if ("#".equals(typedText) || "$".equals(typedText) || ".".equals(typedText)) {
 			return CompletionProvider.COMPLETION_QUERY_TYPE;
 		}
 		return 0;

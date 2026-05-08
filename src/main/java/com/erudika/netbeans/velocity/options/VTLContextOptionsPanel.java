@@ -34,14 +34,16 @@ final class VTLContextOptionsPanel extends javax.swing.JPanel {
 	private final JLabel macroLabel;
 	private final JTextField macroField;
 	private final JLabel symbolsLabel;
+	private final JLabel symbolsHint;
 	private final JTextArea symbolsArea;
 	private final JScrollPane symbolsScroll;
 
 	VTLContextOptionsPanel(VTLContextOptionsPanelController controller) {
 		this.controller = controller;
-		this.macroLabel = new JLabel("Macro Library File:");
+		this.macroLabel = new JLabel("Macro Library Files (comma-separated):");
 		this.macroField = new JTextField();
-		this.symbolsLabel = new JLabel("Context Variables ($name or $name:Type):");
+		this.symbolsLabel = new JLabel("Context Variables (one per line):");
+		this.symbolsHint = new JLabel("<html><small>Format: <b>$varName</b> or <b>$varName:com.example.Type</b> (enables method completion)</small></html>");
 		this.symbolsArea = new JTextArea(8, 40);
 		this.symbolsScroll = new JScrollPane(symbolsArea);
 
@@ -58,12 +60,14 @@ final class VTLContextOptionsPanel extends javax.swing.JPanel {
 				.addComponent(macroField)
 				.addGap(12)
 				.addComponent(symbolsLabel)
+				.addComponent(symbolsHint)
 				.addComponent(symbolsScroll));
 		layout.setVerticalGroup(layout.createSequentialGroup()
 				.addComponent(macroLabel)
 				.addComponent(macroField, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
 				.addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
 				.addComponent(symbolsLabel)
+				.addComponent(symbolsHint)
 				.addComponent(symbolsScroll));
 	}
 

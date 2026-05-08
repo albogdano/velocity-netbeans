@@ -34,12 +34,27 @@ import org.openide.filesystems.FileObject;
 
 public final class ContextPutAnalyzer {
 
+	/** Velocity context types — direct put() calls. */
 	private static final Set<String> VELOCITY_CONTEXT_TYPES = Set.of(
 			"org.apache.velocity.VelocityContext",
 			"org.apache.velocity.context.Context",
 			"org.apache.velocity.context.InternalContextAdapter",
 			"org.apache.velocity.context.AbstractContext",
 			"org.apache.velocity.context.AbstractContextAdapter"
+	);
+
+	/** Spring Model types — addAttribute() calls that feed into VelocityContext via Spring's VelocityView. */
+	private static final Set<String> SPRING_MODEL_TYPES = Set.of(
+			"org.springframework.ui.Model",
+			"org.springframework.ui.ModelMap",
+			"org.springframework.ui.ExtendedModelMap",
+			"org.springframework.ui.ConcurrentModel",
+			"org.springframework.web.servlet.ModelAndView"
+	);
+
+	/** Method names that put a keyed value into a Velocity-bound context. */
+	private static final Set<String> CONTEXT_PUT_METHODS = Set.of(
+			"put", "addAttribute"
 	);
 
 	private ContextPutAnalyzer() {
@@ -96,8 +111,8 @@ public final class ContextPutAnalyzer {
 				methodName = mst.getIdentifier().toString();
 				receiver = mst.getExpression();
 			}
-			if ("put".equals(methodName) && node.getArguments().size() >= 2) {
-				if (isVelocityContextType(receiver)) {
+			if (methodName != null && CONTEXT_PUT_METHODS.contains(methodName) && node.getArguments().size() >= 2) {
+				if (isTemplateContextType(receiver)) {
 					String varName = extractStringLiteral(node.getArguments().get(0));
 					if (varName != null) {
 						String typeName = resolveTypeName(node.getArguments().get(1));
@@ -108,7 +123,7 @@ public final class ContextPutAnalyzer {
 			return super.visitMethodInvocation(node, p);
 		}
 
-		private boolean isVelocityContextType(ExpressionTree receiver) {
+		private boolean isTemplateContextType(ExpressionTree receiver) {
 			if (receiver == null) {
 				return false;
 			}
@@ -137,7 +152,7 @@ public final class ContextPutAnalyzer {
 				return false;
 			}
 			String qn = te.getQualifiedName().toString();
-			if (qn != null && VELOCITY_CONTEXT_TYPES.contains(qn)) {
+			if (qn != null && (VELOCITY_CONTEXT_TYPES.contains(qn) || SPRING_MODEL_TYPES.contains(qn))) {
 				return true;
 			}
 			TypeMirror superclass = te.getSuperclass();
@@ -156,13 +171,6 @@ public final class ContextPutAnalyzer {
 				}
 			}
 			return false;
-		}
-
-		private String getQualifiedName(Element el) {
-			if (el instanceof TypeElement te) {
-				return te.getQualifiedName().toString();
-			}
-			return null;
 		}
 
 		private String extractStringLiteral(ExpressionTree arg) {

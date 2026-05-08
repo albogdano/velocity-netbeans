@@ -9,6 +9,7 @@
  */
 package com.erudika.netbeans.velocity.lexer;
 
+import com.erudika.netbeans.velocity.jcclexer.VelocityParser;
 import com.erudika.netbeans.velocity.jcclexer.VelocityParserConstants;
 import com.erudika.netbeans.velocity.jcclexer.VelocityParserTokenManager;
 import org.netbeans.api.lexer.Token;
@@ -39,6 +40,13 @@ class VTLLexer implements Lexer<VTLTokenId>
       m_VelocityParserTokenManager = new VelocityParserTokenManager(new VelocityCharStream(info.input()));
       m_CurrLexState               = null;
 
+      // Register built-in directives as known macros so the token manager
+      // produces MACROCALL_DIRECTIVE (highlighted as directive) instead of WORD.
+      VelocityParser.addMacroName("parse");
+      VelocityParser.addMacroName("define");
+      VelocityParser.addMacroName("evaluate");
+      VelocityParser.addMacroName("break");
+
       if (info.state() != null)
          m_VelocityParserTokenManager.SwitchTo((Integer)info.state());
    }
@@ -61,7 +69,15 @@ class VTLLexer implements Lexer<VTLTokenId>
       if (m_Info.input().readLength() < 1)
          returnToken = null;
       else
-         returnToken = m_Info.tokenFactory().createToken(VTLLanguageHierarchy.getToken(token.kind));
+      {
+         VTLTokenId tokenId = VTLLanguageHierarchy.getToken(token.kind);
+         if (tokenId == null)
+         {
+            // Fallback for unmapped token kinds — treat as plain text
+            tokenId = VTLLanguageHierarchy.getToken(VelocityParserConstants.TEXT);
+         }
+         returnToken = m_Info.tokenFactory().createToken(tokenId);
+      }
 
       return(returnToken);
    }

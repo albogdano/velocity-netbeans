@@ -1,5 +1,15 @@
 # Changelog
 
+**For version 3.0.0**
+
+- Many improvements and fixes, including unnecessary errors for valid VTL syntax.
+- HTML embedding - allows us to mix HTML + VTL in the same file
+- Advanced autocompletion for everything in the context and built-in directives
+- Context scanning for Spring and Velocity API methods for adding data to VelocityContext
+- Configurable library file and global variables inside Netbeans Options > Editor > Velocity Context
+- New autocomplete icons
+- Various fixes and improvements
+
 **For version 2.2.5**
 
 - Bugfix: locking rule violation in VTLBracesMatcher

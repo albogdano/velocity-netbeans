@@ -15,6 +15,7 @@
  */
 package com.erudika.netbeans.velocity.completion;
 
+import static com.erudika.netbeans.velocity.completion.MacroLibraryScanner.DEFAULT_LIBRARY;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -27,7 +28,6 @@ public final class VTLCompletionSettings {
 
 	static final String CONTEXT_SYMBOLS_KEY = "completion.external.symbols";
 	static final String MACRO_LIBRARY_KEY = "completion.macro.library";
-	static final String defaultLibraryFile = "VM_global_library.vm";
 	private static volatile Set<String> overrideSymbols;
 	private static volatile String overrideMacroLibrary;
 
@@ -39,16 +39,16 @@ public final class VTLCompletionSettings {
 			return overrideMacroLibrary;
 		}
 		try {
-			return preferences().get(MACRO_LIBRARY_KEY, defaultLibraryFile);
+			return preferences().get(MACRO_LIBRARY_KEY, DEFAULT_LIBRARY);
 		} catch (Throwable ex) {
 			return "";
 		}
 	}
 
 	public static void setConfiguredMacroLibrary(String value) {
-		overrideMacroLibrary = (value != null && !value.isEmpty()) ? value : defaultLibraryFile;
+		overrideMacroLibrary = (value != null && !value.isEmpty()) ? value : DEFAULT_LIBRARY;
 		try {
-			preferences().put(MACRO_LIBRARY_KEY, value != null ? value : defaultLibraryFile);
+			preferences().put(MACRO_LIBRARY_KEY, value != null ? value : DEFAULT_LIBRARY);
 		} catch (Throwable ex) {
 			// Ignore
 		}

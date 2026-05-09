@@ -48,7 +48,12 @@
             <file name="com.erudika.netbeans.velocity.parser.VTLParserFactory.instance"/>
             <file name="com.erudika.netbeans.velocity.parser.VTLSyntaxErrorsHighlightingTaskFactory.instance"/>
             <folder name="EmbeddingProviders">
-               <file name="com-erudika-netbeans-velocity-embedding-HTMLEmbeddingProvider.instance"/>
+               <file name="com-erudika-netbeans-velocity-embedding-HTMLEmbeddingProvider.instance">
+                  <attr name="instanceOf" stringvalue="org.netbeans.modules.parsing.spi.TaskFactory"/>
+                  <attr name="instanceCreate" methodvalue="org.netbeans.modules.parsing.impl.EmbeddingProviderFactory.create"/>
+                  <attr name="targetMimeType" stringvalue="text/html"/>
+                  <attr name="provider" newvalue="com.erudika.netbeans.velocity.embedding.HTMLEmbeddingProvider"/>
+               </file>
             </folder>
             <folder name="CompletionProviders">
                <file name="com-erudika-netbeans-velocity-completion-VTLCompletionProvider.instance">

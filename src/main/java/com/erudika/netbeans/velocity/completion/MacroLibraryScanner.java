@@ -35,8 +35,12 @@ import org.openide.filesystems.FileUtil;
 
 public final class MacroLibraryScanner {
 
+	/**
+	 * Default library file.
+	 */
+	public static final String DEFAULT_LIBRARY = "VM_global_library.vm";
+
 	private static final Logger LOG = Logger.getLogger(MacroLibraryScanner.class.getName());
-	private static final String DEFAULT_LIBRARY = "VM_global_library.vm";
 	private static final String LIBRARY_PROPERTY = "velocimacro.library";
 
 	private static final Map<FileObject, CachedResult> cache = Collections.synchronizedMap(new WeakHashMap<>());
@@ -58,6 +62,12 @@ public final class MacroLibraryScanner {
 			}
 			allMacros.addAll(parseAndCache(libFile));
 		}
+
+		// Register library macro names so the lexer highlights them as directives
+		for (MacroInfo macro : allMacros) {
+			com.erudika.netbeans.velocity.jcclexer.VelocityParser.addMacroName(macro.name());
+		}
+
 		return allMacros;
 	}
 

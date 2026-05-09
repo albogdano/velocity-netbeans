@@ -9,6 +9,7 @@
  */
 package com.erudika.netbeans.velocity.parser;
 
+import static com.erudika.netbeans.velocity.completion.MacroLibraryScanner.DEFAULT_LIBRARY;
 import com.erudika.netbeans.velocity.jcclexer.Directive;
 import com.erudika.netbeans.velocity.jcclexer.VelocityParser;
 import com.erudika.netbeans.velocity.jcclexer.node.SimpleNode;
@@ -64,7 +65,15 @@ public class VTLParser extends Parser {
 			m_Parser.addDirective("parse", new Directive(Directive.LINE));
 			m_Parser.addDirective("evaluate", new Directive(Directive.LINE));
 			m_Parser.addDirective("define", new Directive(Directive.BLOCK));
-			final SimpleNode sn = m_Parser.parse(new StringReader(snapshot.getText().toString()), snapshot.getSource().getFileObject().getNameExt());
+
+			// Register library macros so the lexer highlights them as directives
+			FileObject fileObject = snapshot.getSource().getFileObject();
+			if (fileObject != null) {
+				registerLibraryMacros(fileObject);
+			}
+
+			final SimpleNode sn = m_Parser.parse(new StringReader(snapshot.getText().toString()),
+					fileObject != null ? fileObject.getNameExt() : DEFAULT_LIBRARY);
 
 			if (sn != null) {
 				final Set<VelocityAnalyser> analysers = ANALYSERS.get(sme.getModifiedSource().getFileObject());
@@ -79,6 +88,17 @@ public class VTLParser extends Parser {
 			}
 		} catch (com.erudika.netbeans.velocity.jcclexer.ParseException pe) {
 			Logger.getLogger(VTLParser.class.getName()).log(Level.WARNING, null, pe);
+		}
+	}
+
+	private void registerLibraryMacros(FileObject fileObject) {
+		try {
+			for (com.erudika.netbeans.velocity.completion.MacroLibraryScanner.MacroInfo macro
+					: com.erudika.netbeans.velocity.completion.MacroLibraryScanner.getMacros(fileObject)) {
+				VelocityParser.addMacroName(macro.name());
+			}
+		} catch (Throwable ex) {
+			// Don't let macro scanning failures break parsing
 		}
 	}
 

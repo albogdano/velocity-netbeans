@@ -19,9 +19,8 @@ import com.erudika.netbeans.velocity.jcclexer.Directive;
 import com.erudika.netbeans.velocity.jcclexer.ParseException;
 import com.erudika.netbeans.velocity.jcclexer.VelocityParser;
 import java.io.StringReader;
-import org.junit.jupiter.api.Test;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.Test;
 
 class VelocityParserTest {
 
@@ -41,6 +40,15 @@ class VelocityParserTest {
 	void parsesMacroParametersWithDefaultValues() throws Exception {
 		assertParsesWithoutErrors("#macro(test $x = 1)\n#end");
 		assertParsesWithoutErrors("#macro(test $x $y = $fallback)\n#end");
+	}
+
+	@Test
+	void parsesHashInHtmlAttributes() throws Exception {
+		assertParsesWithoutErrors("<a href=\"#spaces-tab\">link</a>");
+		assertParsesWithoutErrors("<li #if($key == \"Core\")class=\"active\"#end>");
+		assertParsesWithoutErrors("<li class=\"tab\"><a href=\"#section\">$!{lang.get(\"title\")}</a></li>");
+		assertParsesWithoutErrors("<a href='#anchor'>link</a>");
+		assertParsesWithoutErrors("<a href=\"#\">top</a>");
 	}
 
 	private void assertParsesWithoutErrors(String template) throws ParseException {

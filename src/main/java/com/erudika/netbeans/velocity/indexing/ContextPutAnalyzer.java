@@ -58,7 +58,7 @@ public final class ContextPutAnalyzer {
 
 	/** Method names that put a keyed value into a Velocity-bound context. */
 	private static final Set<String> CONTEXT_PUT_METHODS = Set.of(
-			"put", "addAttribute"
+			"put", "addAttribute", "addObject"
 	);
 
 	private ContextPutAnalyzer() {

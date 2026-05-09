@@ -116,6 +116,7 @@ context.put("user", userObj);         // → $user typed as User
 // Spring MVC
 model.addAttribute("title", "Hello"); // → $title typed as String
 model.addAttribute("items", list);    // → $items typed as List
+
 ```
 
 Supported receiver types (and subclasses/implementations):

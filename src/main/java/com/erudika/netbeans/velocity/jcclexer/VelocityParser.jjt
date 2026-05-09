@@ -372,6 +372,60 @@ TOKEN_MGR_DECLS:
     public  boolean inDirective;
 
     /**
+     *  Tracks the last character of the most recently produced token.
+     *  Used to detect '#' preceded by a quote character (e.g., href="#anchor")
+     *  so that we don't incorrectly enter directive mode for HTML anchor links.
+     */
+    private char prevChar = 0;
+
+    /**
+     *  Set of VTL built-in directive keywords used to distinguish
+     *  HTML anchor links (like href="#section") from VTL directives
+     *  (like #end) when # appears after a quote character.
+     */
+    private static final java.util.Set<String> DIRECTIVE_KEYWORDS = java.util.Set.of(
+        "if", "else", "elseif", "end", "foreach", "set", "macro",
+        "include", "parse", "evaluate", "define", "stop", "break"
+    );
+
+    /**
+     *  Checks whether the given identifier is a known VTL directive keyword
+     *  or a registered macro name.
+     */
+    private boolean isKnownDirectiveKeyword(String ident) {
+        if (ident == null || ident.isEmpty()) return false;
+        return DIRECTIVE_KEYWORDS.contains(ident) || VelocityParser.isMacro(ident);
+    }
+
+    /**
+     *  Peeks ahead in the input stream to read an identifier starting at
+     *  the current position. Used to determine if characters following a
+     *  '#' form a known VTL directive keyword.
+     *  Restores the input position after peeking.
+     */
+    private String peekDirectiveIdentifier() {
+        StringBuilder sb = new StringBuilder();
+        int peekCount = 0;
+        try {
+            while (peekCount < 30) {
+                char c = input_stream.readChar();
+                peekCount++;
+                if (Character.isLetterOrDigit(c) || c == '_') {
+                    sb.append(c);
+                } else {
+                    break;
+                }
+            }
+        } catch (java.io.IOException e) {
+            // EOF reached while peeking
+        }
+        if (peekCount > 0) {
+            input_stream.backup(peekCount);
+        }
+        return sb.toString();
+    }
+
+    /**
      * Retrieves the current lexer state.
      *
      * @return the current lexer state.
@@ -457,6 +511,7 @@ TOKEN_MGR_DECLS:
         inComment = false;
         inUnparsed = false;
         inSet = false;
+        prevChar = 0;
 
         return;
     }
@@ -777,19 +832,46 @@ MORE :
              * I don't really like this, but I can't think of a legal way
              * you are going into DIRECTIVE while in REFERENCE.  -gmj
              */
+            int origState = curLexState;
+
             if (curLexState == REFERENCE || curLexState == REFMODIFIER)
             {
                 inReference = false;
                 stateStackPop();
             }
 
-            inDirective = true;
+            /*
+             * If # is preceded by a quote character and we were in DEFAULT state,
+             * check if # starts a known VTL directive. If not, treat # as plain
+             * text rather than a directive start. This handles HTML anchor
+             * references like href="#section" where # is not a VTL directive,
+             * while still allowing directives like #end after closing quotes:
+             *   class="active"#end
+             */
+            if (origState == DEFAULT && (prevChar == '"' || prevChar == '\''))
+            {
+                String peekIdent = peekDirectiveIdentifier();
+                if (!isKnownDirectiveKeyword(peekIdent))
+                {
+                    // Not a directive - # is plain text in an HTML attribute
+                }
+                else
+                {
+                    inDirective = true;
+                    stateStackPush();
+                    SwitchTo(PRE_DIRECTIVE);
+                }
+            }
+            else
+            {
+                inDirective = true;
 
-            if (debugPrint)
-                System.out.print("# :  going to " + PRE_DIRECTIVE);
+                if (debugPrint)
+                    System.out.print("# :  going to " + PRE_DIRECTIVE);
 
-            stateStackPush();
-            SwitchTo(PRE_DIRECTIVE);
+                stateStackPush();
+                SwitchTo(PRE_DIRECTIVE);
+            }
         }
     }
 }
@@ -822,6 +904,10 @@ TOKEN :
     <DOUBLE_ESCAPE : "\\\\">
 |   <ESCAPE: "\\" >
 |   <TEXT: (~["$", "#", "\\"])+ >
+    {
+        if (image.length() > 0)
+            prevChar = image.charAt(image.length() - 1);
+    }
 }
 
 /* -----------------------------------------------------------------------

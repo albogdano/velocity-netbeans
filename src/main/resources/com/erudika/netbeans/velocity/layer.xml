@@ -61,6 +61,13 @@
                   <attr name="instanceOf" stringvalue="org.netbeans.spi.editor.completion.CompletionProvider"/>
                </file>
             </folder>
+            <folder name="CodeTemplates">
+               <folder name="Defaults">
+                  <file name="com-erudika-netbeans-velocity-codetemplates.xml" url="codetemplates.xml">
+                     <attr name="SystemFileSystem.localizingBundle" stringvalue="com.erudika.netbeans.velocity.Bundle"/>
+                  </file>
+               </folder>
+            </folder>
          </folder>
          <folder name="html">
             <folder name="CompletionProviders">

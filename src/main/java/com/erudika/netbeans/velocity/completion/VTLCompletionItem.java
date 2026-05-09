@@ -23,10 +23,11 @@ import java.awt.Graphics;
 import java.awt.event.KeyEvent;
 import javax.swing.ImageIcon;
 import javax.swing.text.BadLocationException;
-import javax.swing.text.Caret;
 import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
 import org.netbeans.api.editor.completion.Completion;
+import org.netbeans.lib.editor.codetemplates.api.CodeTemplate;
+import org.netbeans.lib.editor.codetemplates.api.CodeTemplateManager;
 import org.netbeans.spi.editor.completion.CompletionTask;
 import org.netbeans.spi.editor.completion.support.CompletionUtilities;
 import org.openide.util.ImageUtilities;
@@ -80,31 +81,68 @@ public class VTLCompletionItem implements org.netbeans.spi.editor.completion.Com
 
 	@Override
 	public void defaultAction(JTextComponent component) {
+		Completion.get().hideAll();
 		try {
 			Document doc = component.getDocument();
-			Caret caret = component.getCaret();
 			int startOffset = proposal.getReplaceOffset();
-			doc.remove(startOffset, proposal.getReplaceLength());
-			doc.insertString(startOffset, proposal.getInsertText(), null);
+			String parametrizedText = proposal.getInsertText();
 
-			String insertText = proposal.getInsertText();
-			if (insertText.endsWith("()")) {
-				// No-param method or empty parens directive: place caret after ()
-				caret.setDot(startOffset + insertText.length());
-			} else if (insertText.contains("(")) {
-				// Method with params or directive with body: place caret inside parens
-				int parenPos = startOffset + insertText.indexOf('(') + 1;
-				caret.setDot(parenPos);
-			} else if (insertText.contains("#*")) {
-				caret.setDot(startOffset + 3);
-			} else {
-				caret.setDot(startOffset + insertText.length());
+			if (parametrizedText.contains("\n")) {
+				String lineIndent = getLineIndent(doc, startOffset);
+				if (!lineIndent.isEmpty()) {
+					parametrizedText = applyIndentation(parametrizedText, lineIndent);
+				}
 			}
 
-			Completion.get().hideAll();
+			doc.remove(startOffset, proposal.getReplaceLength());
+			component.setCaretPosition(startOffset);
+
+			if (parametrizedText.contains("${")) {
+				CodeTemplateManager manager = CodeTemplateManager.get(doc);
+				if (manager != null) {
+					CodeTemplate template = manager.createTemporary(parametrizedText);
+					if (template != null) {
+						template.insert(component);
+						return;
+					}
+				}
+			}
+
+			doc.insertString(startOffset, parametrizedText, null);
+			component.setCaretPosition(startOffset + parametrizedText.length());
 		} catch (BadLocationException ex) {
-			Completion.get().hideAll();
+			// ignore
 		}
+	}
+
+	@Override
+	public void processKeyEvent(KeyEvent evt) {
+	}
+
+	private static String applyIndentation(String text, String lineIndent) {
+		String[] lines = text.split("\n", -1);
+		StringBuilder sb = new StringBuilder(lines[0]);
+		for (int i = 1; i < lines.length; i++) {
+			sb.append('\n').append(lineIndent).append(lines[i]);
+		}
+		return sb.toString();
+	}
+
+	private static String getLineIndent(Document doc, int offset) throws BadLocationException {
+		int lineStart = offset;
+		while (lineStart > 0 && doc.getText(lineStart - 1, 1).charAt(0) != '\n') {
+			lineStart--;
+		}
+		int indentEnd = lineStart;
+		while (indentEnd < doc.getLength()) {
+			char c = doc.getText(indentEnd, 1).charAt(0);
+			if (c == ' ' || c == '\t') {
+				indentEnd++;
+			} else {
+				break;
+			}
+		}
+		return doc.getText(lineStart, indentEnd - lineStart);
 	}
 
 	@Override
@@ -147,10 +185,6 @@ public class VTLCompletionItem implements org.netbeans.spi.editor.completion.Com
 	public boolean instantSubstitution(JTextComponent component) {
 		defaultAction(component);
 		return true;
-	}
-
-	@Override
-	public void processKeyEvent(KeyEvent evt) {
 	}
 
 	private String getLeftLabelHtml(Color defaultForeground) {

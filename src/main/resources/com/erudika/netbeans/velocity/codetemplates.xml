@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE codetemplates PUBLIC "-//NetBeans//DTD Editor Code Templates settings 1.0//EN"
+                               "http://www.netbeans.org/dtds/EditorCodeTemplates-1_0.dtd">
+<codetemplates>
+    <codetemplate abbreviation="set">
+        <code><![CDATA[#set(${VAR default="$var"} = ${VALUE default="value"})${cursor}]]></code>
+    </codetemplate>
+    <codetemplate abbreviation="if">
+        <code><![CDATA[#if(${COND default="$condition"})
+    ${selection}${cursor}
+#end]]></code>
+    </codetemplate>
+    <codetemplate abbreviation="ife">
+        <code><![CDATA[#if(${COND default="$condition"})${cursor}#else ]]></code>
+    </codetemplate>
+    <codetemplate abbreviation="foreach">
+        <code><![CDATA[#foreach(${ITEM default="$item"} in ${LIST default="$list"})
+    ${selection}${cursor}
+#end]]></code>
+    </codetemplate>
+    <codetemplate abbreviation="macro">
+        <code><![CDATA[#macro(${NAME default="name"} ${ARGS default="$arg"})
+    ${cursor}
+#end]]></code>
+    </codetemplate>
+    <codetemplate abbreviation="include">
+        <code><![CDATA[#include("${PATH default="path"}")${cursor}]]></code>
+    </codetemplate>
+    <codetemplate abbreviation="parse">
+        <code><![CDATA[#parse("${PATH default="path"}")${cursor}]]></code>
+    </codetemplate>
+    <codetemplate abbreviation="evaluate">
+        <code><![CDATA[#evaluate(${EXPR default="$expr"})${cursor}]]></code>
+    </codetemplate>
+    <codetemplate abbreviation="define">
+        <code><![CDATA[#define(${NAME default="$block"})
+    ${cursor}
+#end]]></code>
+    </codetemplate>
+    <codetemplate abbreviation="stop">
+        <code><![CDATA[#stop]]></code>
+    </codetemplate>
+    <codetemplate abbreviation="break">
+        <code><![CDATA[#break]]></code>
+    </codetemplate>
+</codetemplates>

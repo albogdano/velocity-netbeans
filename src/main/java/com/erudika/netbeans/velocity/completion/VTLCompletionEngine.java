@@ -51,20 +51,21 @@ final class VTLCompletionEngine {
 	private static final java.util.logging.Level FINE = java.util.logging.Level.FINE;
 
 	private static final List<DirectiveTemplate> DIRECTIVES = List.of(
-			new DirectiveTemplate("#set", "#set($var = value)", "Variable assignment"),
-			new DirectiveTemplate("#macro", "#macro( $arg)\n\n#end", "Macro definition"),
-			new DirectiveTemplate("#if", "#if()\n\n#end", "Conditional directive"),
+			new DirectiveTemplate("#set", "#set(${VAR default=\"$var\"} = ${VALUE default=\"value\"})${cursor}", "Variable assignment"),
+			new DirectiveTemplate("#macro", "#macro(${NAME default=\"name\"} $arg)\n\n#end${cursor}", "Macro definition"),
+			new DirectiveTemplate("#if", "#if(${COND default=\"$condition\"})\n\n#end${cursor}", "Conditional directive"),
+			new DirectiveTemplate("#ifi", "#if(${COND default=\"$condition\"})${cursor}#end", "Inline conditional"),
 			new DirectiveTemplate("#else", "#else", "Else branch"),
-			new DirectiveTemplate("#elseif", "#elseif()", "Else-if branch"),
+			new DirectiveTemplate("#elseif", "#elseif(${COND default=\"$condition\"})${cursor}", "Else-if branch"),
 			new DirectiveTemplate("#end", "#end", "End block"),
-			new DirectiveTemplate("#foreach", "#foreach($item in $list)\n\n#end", "Loop directive"),
-			new DirectiveTemplate("#include", "#include(\"template.vm\")", "Include template"),
-			new DirectiveTemplate("#parse", "#parse(\"template.vm\")", "Parse template"),
-			new DirectiveTemplate("#evaluate", "#evaluate($expr)", "Evaluate expression"),
-			new DirectiveTemplate("#define", "#define($var)\n\n#end", "Define block"),
+			new DirectiveTemplate("#foreach", "#foreach(${ITEM default=\"$item\"} in $list)\n\n#end${cursor}", "Loop directive"),
+			new DirectiveTemplate("#include", "#include(\"${PATH default=\"path\"}\")${cursor}", "Include template"),
+			new DirectiveTemplate("#parse", "#parse(\"${PATH default=\"path\"}\")${cursor}", "Parse template"),
+			new DirectiveTemplate("#evaluate", "#evaluate(${EXPR default=\"$expr\"})${cursor}", "Evaluate expression"),
+			new DirectiveTemplate("#define", "#define(${NAME default=\"$block\"})\n\n#end${cursor}", "Define block"),
 			new DirectiveTemplate("#break", "#break", "Break directive"),
 			new DirectiveTemplate("#stop", "#stop", "Stop rendering"),
-			new DirectiveTemplate("#comment #* .. *#", "#*  *# ", "Comment block")
+			new DirectiveTemplate("#comment #* .. *#", "#* ${TEXT default=\"comment\"} *# ${cursor}", "Comment block")
 	);
 
 	private static final List<String> KEYWORDS = List.of("in", "and", "or", "not", "eq", "ne", "lt", "le", "gt", "ge");

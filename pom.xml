@@ -8,8 +8,7 @@
 
 	<packaging>nbm</packaging>
 	<name>Velocity Plugin for Netbeans</name>
-	<description>A plugin for Para which enables support for Amazon DynamoDB.</description>
-	<url>https://paraio.org</url>
+	<description>NetBeans plugin that plugin that provides editor support for Apache Velocity Template Language (VTL) in .vm and .vsl files.</description>
 
 	<organization>
 		<name>Erudika</name>
@@ -240,6 +239,9 @@
 				<configuration>
 					<moduleType>normal</moduleType>
 					<useOSGiDependencies>false</useOSGiDependencies>
+					<manifest>
+						<Automatic-Module-Name>com.erudika.netbeans.velocity</Automatic-Module-Name>
+					</manifest>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -276,9 +278,6 @@
 				<configuration>
 					<archive>
 						<manifestFile>${project.build.outputDirectory}/META-INF/MANIFEST.MF</manifestFile>
-						<manifestEntries>
-							<Automatic-Module-Name>com.erudika.netbeans.velocity</Automatic-Module-Name>
-						</manifestEntries>
 					</archive>
 				</configuration>
 			</plugin>

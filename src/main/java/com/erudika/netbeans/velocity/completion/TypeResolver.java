@@ -320,7 +320,7 @@ public final class TypeResolver {
 			if (angleIdx < 0) {
 				return type.substring(lastDot + 1);
 			}
-			String basePart = type.substring(0, angleIdx + 1);
+			String basePart = type.substring(0, angleIdx);
 			int baseLastDot = basePart.lastIndexOf('.');
 			return (baseLastDot >= 0 ? basePart.substring(baseLastDot + 1) : basePart)
 					+ simplifyGenerics(type.substring(angleIdx));
@@ -338,11 +338,11 @@ public final class TypeResolver {
 	private static String simplifyGenerics(String generics) {
 		// Simplify "<java.lang.String, java.util.List<java.lang.Integer>>" → "<String, List<Integer>>"
 		StringBuilder result = new StringBuilder();
-		String[] parts = generics.split("(?=[<>,])");
+		String[] parts = generics.splitWithDelimiters("[<>, ]", 25);
 		for (String part : parts) {
 			String trimmed = part.trim();
 			if (trimmed.equals("<") || trimmed.equals(">") || trimmed.equals(",")) {
-				result.append(trimmed);
+				result.append(trimmed).append(trimmed.equals(",") ? " " : "");
 			} else {
 				int dot = trimmed.lastIndexOf('.');
 				result.append(dot >= 0 ? trimmed.substring(dot + 1) : trimmed);

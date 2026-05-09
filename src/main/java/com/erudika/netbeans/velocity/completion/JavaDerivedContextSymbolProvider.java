@@ -60,11 +60,4 @@ public class JavaDerivedContextSymbolProvider implements VelocityContextSymbolPr
 		return symbols;
 	}
 
-	private static String getDisplayType(String t) {
-		if (t != null) {
-			int dot = t.lastIndexOf('.');
-			return dot >= 0 ? t.substring(dot + 1) : t;
-		}
-		return t;
-	}
 }

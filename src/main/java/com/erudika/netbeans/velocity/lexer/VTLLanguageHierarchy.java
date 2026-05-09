@@ -9,8 +9,8 @@
  */
 package com.erudika.netbeans.velocity.lexer;
 
-import static com.erudika.netbeans.velocity.jcclexer.VelocityParserConstants.*;
 import com.erudika.netbeans.velocity.embedding.HTMLEmbeddingSupport;
+import static com.erudika.netbeans.velocity.jcclexer.VelocityParserConstants.*;
 import com.erudika.netbeans.velocity.parser.VTLParser;
 import java.util.Arrays;
 import java.util.Collection;
@@ -109,8 +109,8 @@ public class VTLLanguageHierarchy extends LanguageHierarchy<VTLTokenId>
          new VTLTokenId ("EXPONENT", "operator", EXPONENT),
          new VTLTokenId ("LETTER", "", LETTER),
          new VTLTokenId ("DIRECTIVE_CHAR", "", DIRECTIVE_CHAR),
-         new VTLTokenId ("WORD", "macro", WORD),
-         new VTLTokenId ("BRACKETED_WORD", "macro", BRACKETED_WORD),
+         new VTLTokenId ("WORD", "", WORD),
+         new VTLTokenId ("BRACKETED_WORD", "", BRACKETED_WORD),
          new VTLTokenId ("ALPHA_CHAR", "", ALPHA_CHAR),
          new VTLTokenId ("ALPHANUM_CHAR", "", ALPHANUM_CHAR),
          new VTLTokenId ("IDENTIFIER_CHAR", "", IDENTIFIER_CHAR),

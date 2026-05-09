@@ -175,7 +175,7 @@ final class VTLCompletionEngine {
 		for (String configuredSymbol : VTLCompletionSettings.getConfiguredSymbols()) {
 			String normalized = normalizeReference(configuredSymbol);
 			if (normalized != null && matches(normalized, filter)) {
-				put(proposals, normalized, new VTLCompletionProposal(normalized, normalized, "Context variable",
+				put(proposals, normalized, new VTLCompletionProposal(normalized, normalized, "Global context variable",
 						VTLCompletionItem.ItemType.REFERENCE, 30, context.replaceOffset(), context.replaceLength()));
 			}
 		}

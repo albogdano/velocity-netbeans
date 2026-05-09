@@ -24,6 +24,8 @@
 
 This is an <a href="https://netbeans.apache.org/">Apache NetBeans</a> plugin that provides editor support for <a href="https://velocity.apache.org/">Apache Velocity Template Language</a> (VTL) files (<code>.vm</code> and <code>.vsl</code> extensions).
 
+[![Screenshot](img/screen1.png)](img/screen1.png)
+
 ### Features
 
 - **Syntax highlighting** — 67 token types across 10 categories (keyword, directive, comment, string, operator, number, identifier, boolean, separator, unparsed content)

@@ -105,16 +105,6 @@
 			<artifactId>org-netbeans-modules-parsing-api</artifactId>
 			<version>${netbeans.api.version}</version>
 		</dependency>
-<!--		<dependency>
-			<groupId>org.netbeans.api</groupId>
-			<artifactId>org-netbeans-modules-csl-api</artifactId>
-			<version>${netbeans.api.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.netbeans.api</groupId>
-			<artifactId>org-netbeans-modules-csl-types</artifactId>
-			<version>${netbeans.api.version}</version>
-		</dependency>-->
 		<dependency>
 			<groupId>org.netbeans.api</groupId>
 			<artifactId>org-netbeans-spi-editor-hints</artifactId>

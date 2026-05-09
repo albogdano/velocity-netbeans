@@ -34,7 +34,7 @@ import org.openide.text.NbDocument;
 /**
  * Analyzes an abstract syntax tree to find and add code folds to VTL editor.
  *
- * @author <a href="mailto:werner.jaeger@t-systems.com">Werner Jaeger</a>
+ * @author <a href="mailto:werner.jaeger@t-systems.com">Werner Jäger</a>
  */
 class VTLFoldAnalyser extends VelocityAnalyser
 {
@@ -43,6 +43,7 @@ class VTLFoldAnalyser extends VelocityAnalyser
    private final StyledDocument         m_Document;
 
    private FoldHierarchyTransaction     m_Transaction;
+   private boolean                      m_TransactionValid;
 
    /**
     * Creates new {@code VTLFoldAnalyser}.
@@ -101,6 +102,9 @@ class VTLFoldAnalyser extends VelocityAnalyser
 
    private Object visitImpl(final SimpleNode node, final Object oData)
    {
+      if (!m_TransactionValid)
+         return(node.childrenAccept(this, oData));
+
       final Token  firstToken = node.getFirstToken();
       final Token  lastToken  = node.getLastToken();
 
@@ -137,8 +141,22 @@ class VTLFoldAnalyser extends VelocityAnalyser
     */
    @Override public void openTransaction()
    {
+      m_TransactionValid = false;
+
       if (m_Transaction == null)
-         m_Transaction = m_Operation.openTransaction();
+      {
+         try
+         {
+            m_Transaction = m_Operation.openTransaction();
+         }
+         catch (final IllegalStateException x)
+         {
+            m_Transaction = null;
+            return;
+         }
+      }
+
+      m_TransactionValid = true;
 
       for (final Fold fold : m_CurrentFolds.values())
          ((VTLFoldInfo)m_Operation.getExtraInfo(fold)).setState(VTLFoldInfo.State.UNTOUCHED);
@@ -149,6 +167,12 @@ class VTLFoldAnalyser extends VelocityAnalyser
     */
    @Override public void commitTransaction()
    {
+      if (!m_TransactionValid)
+      {
+         m_Transaction = null;
+         return;
+      }
+
       final Set<VTLFoldInfo> untouched = new HashSet<VTLFoldInfo>();
 
       for (final Fold fold : m_CurrentFolds.values())
@@ -156,7 +180,14 @@ class VTLFoldAnalyser extends VelocityAnalyser
          final VTLFoldInfo info = ((VTLFoldInfo)m_Operation.getExtraInfo(fold));
          if (info.getState() == VTLFoldInfo.State.UNTOUCHED)
          {
-            m_Operation.removeFromHierarchy(fold, m_Transaction);
+            try
+            {
+               m_Operation.removeFromHierarchy(fold, m_Transaction);
+            }
+            catch (final IllegalStateException x)
+            {
+               // Transaction may have been invalidated externally
+            }
             untouched.add(info);
          }
       }
@@ -165,8 +196,19 @@ class VTLFoldAnalyser extends VelocityAnalyser
          m_CurrentFolds.remove(info);
 
       if (m_Transaction != null)
-         m_Transaction.commit();
+      {
+         try
+         {
+            m_Transaction.commit();
+         }
+         catch (final IllegalStateException x)
+         {
+            // FoldHierarchyChange already committed — can happen if the
+            // hierarchy was invalidated while the parser was still running.
+         }
+      }
 
       m_Transaction = null;
+      m_TransactionValid = false;
    }
 }

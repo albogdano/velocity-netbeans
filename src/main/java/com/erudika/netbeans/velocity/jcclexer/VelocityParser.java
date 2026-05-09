@@ -21,9 +21,15 @@ import java.util.TreeSet;
  */
 public class VelocityParser/*@bgen(jjtree)*/implements VelocityParserTreeConstants, VelocityParserConstants {/*@bgen(jjtree)*/
   protected JJTVelocityParserState jjtree = new JJTVelocityParserState();/**
-     *  This set contains a list of all declared macro names.
-     */
-    private final static Set<String> m_MacroNames = new TreeSet<String>();
+    *  This set contains a list of all declared macro names.
+    */
+   private final static Set<String> m_MacroNames = new TreeSet<String>();
+
+   /**
+    *  Persistent set of library macro names (never cleared between parses).
+    *  Ensures library macros remain available to the lexer across re-parses.
+    */
+   private final static Set<String> m_LibraryMacroNames = new TreeSet<String>();
 
     /**
      *  Name of current template we are parsing.  Passed to us in parse()
@@ -158,21 +164,29 @@ public class VelocityParser/*@bgen(jjtree)*/implements VelocityParserTreeConstan
         return(sn);
     }
 
-    /**
-     *  This method add a declared macro name.
-     */
-    public static void addMacroName(final String strMacroName)
-    {
-        m_MacroNames.add(strMacroName);
-    }
+/**
+    *  This method add a declared macro name.
+    */
+   public static void addMacroName(final String strMacroName)
+   {
+      m_MacroNames.add(strMacroName);
+   }
 
-    /**
-     *  This method finds out if the macro is declared
-     */
-    public static boolean isMacro(final String strMacroName)
-    {
-        return(m_MacroNames.contains(strMacroName));
-    }
+   /**
+    *  This method adds a library macro name (persistent across parses).
+    */
+   public static void addLibraryMacroName(final String strMacroName)
+   {
+      m_LibraryMacroNames.add(strMacroName);
+   }
+
+   /**
+    *  This method finds out if the macro is declared
+    */
+   public static boolean isMacro(final String strMacroName)
+   {
+      return(m_MacroNames.contains(strMacroName) || m_LibraryMacroNames.contains(strMacroName));
+   }
 
     /**
      *  This method add a plugable directive.

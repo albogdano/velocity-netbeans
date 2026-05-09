@@ -40,12 +40,13 @@ class VTLLexer implements Lexer<VTLTokenId>
       m_VelocityParserTokenManager = new VelocityParserTokenManager(new VelocityCharStream(info.input()));
       m_CurrLexState               = null;
 
-      // Register built-in directives as known macros so the token manager
+      // Register built-in directives as known library macros so the token manager
       // produces MACROCALL_DIRECTIVE (highlighted as directive) instead of WORD.
-      VelocityParser.addMacroName("parse");
-      VelocityParser.addMacroName("define");
-      VelocityParser.addMacroName("evaluate");
-      VelocityParser.addMacroName("break");
+      // Using addLibraryMacroName() ensures they persist across parse() clear() calls.
+      VelocityParser.addLibraryMacroName("parse");
+      VelocityParser.addLibraryMacroName("define");
+      VelocityParser.addLibraryMacroName("evaluate");
+      VelocityParser.addLibraryMacroName("break");
 
       if (info.state() != null)
          m_VelocityParserTokenManager.SwitchTo((Integer)info.state());

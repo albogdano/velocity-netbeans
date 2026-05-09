@@ -95,7 +95,7 @@ public class VTLParser extends Parser {
 		try {
 			for (com.erudika.netbeans.velocity.completion.MacroLibraryScanner.MacroInfo macro
 					: com.erudika.netbeans.velocity.completion.MacroLibraryScanner.getMacros(fileObject)) {
-				VelocityParser.addMacroName(macro.name());
+				VelocityParser.addLibraryMacroName(macro.name());
 			}
 		} catch (Throwable ex) {
 			// Don't let macro scanning failures break parsing

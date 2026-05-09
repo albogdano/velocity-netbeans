@@ -12,7 +12,7 @@
    <fontcolor name="comment"           default="comment"/>
    <fontcolor name="unparsedcontent"   default="comment"/>
    <fontcolor name="directive"         default="keyword"/>
-   <!--<fontcolor name="macro"             default="keyword"/>-->
+   <fontcolor name="macro"             default="keyword"/>
    <fontcolor name="boolean"           default="keyword"/>
    <fontcolor name="string"            default="string"/>
    <fontcolor name="separator"         default="keyword"/>

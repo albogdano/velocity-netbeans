@@ -63,9 +63,10 @@ public final class MacroLibraryScanner {
 			allMacros.addAll(parseAndCache(libFile));
 		}
 
-		// Register library macro names so the lexer highlights them as directives
+		// Register library macro names so the lexer highlights them as directives.
+		// Using addLibraryMacroName() ensures they persist across parse() clear() calls.
 		for (MacroInfo macro : allMacros) {
-			com.erudika.netbeans.velocity.jcclexer.VelocityParser.addMacroName(macro.name());
+			VelocityParser.addLibraryMacroName(macro.name());
 		}
 
 		return allMacros;

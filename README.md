@@ -1,5 +1,10 @@
 <h1 align="center">
-  <img width="400" src="https://upload.wikimedia.org/wikipedia/commons/c/cb/Apache_Velocity_logo.svg">
+	<picture>
+    <source media="(prefers-color-scheme: dark)" srcset="img/velocity-dark.svg"/>
+    <source media="(prefers-color-scheme: light)" srcset="img/velocity.svg"/>
+		<img width="400" alt="Apache Velocity Logo" src="img/velocity.svg">
+  </picture>
+
   <br>Velocity Plugin for Apache NetBeans</br>
 </h1>
 
@@ -14,9 +19,10 @@
   <a href="#known-issues">Known Issues</a>
 </p>
 
-<p align="center">
+
+## What it is
+
 This is an <a href="https://netbeans.apache.org/">Apache NetBeans</a> plugin that provides editor support for <a href="https://velocity.apache.org/">Apache Velocity Template Language</a> (VTL) files (<code>.vm</code> and <code>.vsl</code> extensions).
-</p>
 
 ### Features
 

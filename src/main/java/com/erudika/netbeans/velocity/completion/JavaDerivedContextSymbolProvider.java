@@ -21,11 +21,15 @@ import com.erudika.netbeans.velocity.indexing.ContextVarStore;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.netbeans.api.project.FileOwnerQuery;
 import org.netbeans.api.project.Project;
 import org.openide.filesystems.FileObject;
 
 public class JavaDerivedContextSymbolProvider implements VelocityContextSymbolProvider {
+
+	private static final Logger LOG = Logger.getLogger(JavaDerivedContextSymbolProvider.class.getName());
 
 	public static JavaDerivedContextSymbolProvider create() {
 		return new JavaDerivedContextSymbolProvider();
@@ -47,9 +51,19 @@ public class JavaDerivedContextSymbolProvider implements VelocityContextSymbolPr
 
 		List<ContextPutAnalyzer.ContextVarEntry> entries = ContextVarStore.load(projectDir);
 		if (entries.isEmpty()) {
-			// Always trigger scan when no results - handles first run and stale empty cache
+			// Trigger async scan and wait briefly for results
 			ContextVarScanner.scanProject(project);
-			return List.of();
+			try {
+				Thread.sleep(500);
+			} catch (InterruptedException e) {
+				Thread.currentThread().interrupt();
+			}
+			entries = ContextVarStore.load(projectDir);
+			if (entries.isEmpty()) {
+				LOG.log(Level.FINE, "JavaDerivedContextSymbolProvider: no scanned variables found for {0}",
+						projectDir.getName());
+				return List.of();
+			}
 		}
 
 		List<VelocityContextSymbol> symbols = new ArrayList<>();
@@ -59,5 +73,4 @@ public class JavaDerivedContextSymbolProvider implements VelocityContextSymbolPr
 		}
 		return symbols;
 	}
-
 }

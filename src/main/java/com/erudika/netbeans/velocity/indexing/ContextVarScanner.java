@@ -23,6 +23,9 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.netbeans.api.project.FileOwnerQuery;
 import org.netbeans.api.project.Project;
+import org.netbeans.api.project.ProjectUtils;
+import org.netbeans.api.project.SourceGroup;
+import org.netbeans.api.project.Sources;
 import org.openide.filesystems.FileAttributeEvent;
 import org.openide.filesystems.FileChangeListener;
 import org.openide.filesystems.FileEvent;
@@ -39,11 +42,10 @@ public final class ContextVarScanner {
 			"target", "build", "dist", "node_modules", "bin", "obj", ".gradle"
 	);
 	private static final Set<FileObject> SCAN_TRIGGERED = ConcurrentHashMap.newKeySet();
+	private static final Set<FileObject> LISTENER_REGISTERED = ConcurrentHashMap.newKeySet();
 
 	private ContextVarScanner() {
 	}
-
-	private static final Set<FileObject> LISTENER_REGISTERED = ConcurrentHashMap.newKeySet();
 
 	public static void scanProject(Project project) {
 		if (project == null) {
@@ -64,7 +66,7 @@ public final class ContextVarScanner {
 			SCAN_TRIGGERED.remove(projectDir);
 			SCAN_TRIGGERED.add(projectDir);
 		}
-		RP.post(new ScanTask(projectDir));
+		RP.post(new ScanTask(project));
 
 		// Register file listener only once per project
 		if (LISTENER_REGISTERED.add(projectDir)) {
@@ -77,10 +79,10 @@ public final class ContextVarScanner {
 
 	private static final class ScanTask implements Runnable {
 
-		private final FileObject projectDir;
+		private final Project project;
 
-		ScanTask(FileObject projectDir) {
-			this.projectDir = projectDir;
+		ScanTask(Project project) {
+			this.project = project;
 		}
 
 		@Override
@@ -88,13 +90,33 @@ public final class ContextVarScanner {
 			try {
 				List<ContextPutAnalyzer.ContextVarEntry> allEntries = new ArrayList<>();
 				int[] counts = {0, 0}; // [0]=total java files, [1]=successfully analyzed
-				collectJavaFiles(projectDir, allEntries, counts);
+
+				// First, try to scan project source roots (handles Maven/Gradle projects)
+				Sources sources = ProjectUtils.getSources(project);
+				if (sources != null) {
+					SourceGroup[] javaGroups = sources.getSourceGroups("java");
+					if (javaGroups != null) {
+						for (SourceGroup group : javaGroups) {
+							FileObject root = group.getRootFolder();
+							if (root != null && root.isValid()) {
+								collectJavaFiles(root, allEntries, counts);
+							}
+						}
+					}
+				}
+
+				// Always also scan the project directory for any .java files not in source roots
+				FileObject projectDir = project.getProjectDirectory();
+				if (projectDir != null) {
+					collectJavaFiles(projectDir, allEntries, counts);
+				}
+
 				ContextVarStore.store(projectDir, allEntries);
 				LOG.log(Level.INFO, "Velocity context scan complete: found {0} variables from {1}/{2} Java files in project {3}",
 						new Object[]{allEntries.size(), counts[1], counts[0], projectDir.getName()});
 			} catch (Throwable ex) {
-				LOG.log(Level.WARNING, "Error scanning velocity context variables in " + projectDir.getName(), ex);
-				SCAN_TRIGGERED.remove(projectDir);
+				LOG.log(Level.WARNING, "Error scanning velocity context variables in " + project.getProjectDirectory().getName(), ex);
+				SCAN_TRIGGERED.remove(project.getProjectDirectory());
 			}
 		}
 
@@ -165,7 +187,7 @@ public final class ContextVarScanner {
 		private void reScan() {
 			ContextVarStore.clearCache(projectDir);
 			SCAN_TRIGGERED.remove(projectDir);
-			RP.post(new ScanTask(projectDir));
+			RP.post(new ScanTask(FileOwnerQuery.getOwner(projectDir)));
 		}
 	}
 }

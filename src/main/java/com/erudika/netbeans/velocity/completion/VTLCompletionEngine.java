@@ -161,8 +161,6 @@ final class VTLCompletionEngine {
 	private static void addReferenceProposals(Map<String, VTLCompletionProposal> proposals, CompletionContext context,
 			TemplateSymbols symbols, FileObject fileObject) {
 		String filter = stripPrefixMarker(context.prefix(), '$');
-		addReferenceSymbols(proposals, symbols.declaredReferences(), "Variable", 10, filter, context);
-		addReferenceSymbols(proposals, symbols.observedReferences(), "Local variable", 20, filter, context);
 
 		for (VelocityContextSymbol builtIn : BUILT_IN_REFERENCES) {
 			String normalized = normalizeReference(builtIn.name());
@@ -176,7 +174,7 @@ final class VTLCompletionEngine {
 			String normalized = normalizeReference(configuredSymbol);
 			if (normalized != null && matches(normalized, filter)) {
 				put(proposals, normalized, new VTLCompletionProposal(normalized, normalized, "Global context variable",
-						VTLCompletionItem.ItemType.REFERENCE, 30, context.replaceOffset(), context.replaceLength()));
+						VTLCompletionItem.ItemType.REFERENCE, 15, context.replaceOffset(), context.replaceLength()));
 			}
 		}
 
@@ -191,10 +189,13 @@ final class VTLCompletionEngine {
 				if (normalized != null && matches(normalized, filter)) {
 					put(proposals, normalized, new VTLCompletionProposal(normalized, normalized,
 							symbol.description() != null ? symbol.description() : "App Context variable",
-							VTLCompletionItem.ItemType.REFERENCE, 30, context.replaceOffset(), context.replaceLength()));
+							VTLCompletionItem.ItemType.REFERENCE, 15, context.replaceOffset(), context.replaceLength()));
 				}
 			}
 		}
+
+		addReferenceSymbols(proposals, symbols.declaredReferences(), "Variable", 10, filter, context);
+		addReferenceSymbols(proposals, symbols.observedReferences(), "Local variable", 20, filter, context);
 	}
 
 	private static void addReferenceSymbols(Map<String, VTLCompletionProposal> proposals, Set<String> symbols,

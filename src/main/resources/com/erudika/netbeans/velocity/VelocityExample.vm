@@ -1,6 +1,5 @@
 ## Velocity HTML Example Template.
 ## Demonstrates HTML mixing with VTL directives.
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,48 +8,47 @@
     <link rel="stylesheet" href="/css/main.css">
 </head>
 <body>
-    <header>
-        <h1>Welcome to $site.name</h1>
-        #if($user.loggedIn)
-            <nav>
-                <a href="/dashboard">Dashboard</a>
-                <a href="/profile">$user.name</a>
-                <a href="/logout">Logout</a>
-            </nav>
-        #else
-            <nav>
-                <a href="/login">Login</a>
-                <a href="/register">Register</a>
-            </nav>
-        #end
-    </header>
+	#macro(renderNav $user $links)
+		<nav>
+			#foreach($link in $links)
+				<a href="$link.url">$link.label</a>
+			#end
+			#if($user.loggedIn)
+				<span>Hello, $user.name</span>
+			#end
+		</nav>
+	#end
+	<header>
+		<h1>Welcome to $site.name</h1>
+		#renderNav($user $navLinks)
+	</header>
 
-    <main>
-        #foreach($item in $items)
-        <article class="item" id="item-${item.id}">
-            <h2>$item.title</h2>
-            <p class="description">$item.description</p>
-            <div class="meta">
-                <span>By: $item.author</span>
-                <span>Date: $item.date</span>
-            </div>
-            #if($item.hasComments)
-                <section class="comments">
-                    #foreach($comment in $item.comments)
-                    <div class="comment">
-                        <strong>$comment.author</strong>
-                        <p>$comment.text</p>
-                    </div>
-                    #end
-                </section>
-            #end
-        </article>
-        #end
-    </main>
+	<main>
+		#foreach($item in $items)
+		<article class="item" id="item-${item.id}">
+			<h2>$item.title</h2>
+			<p class="description">$item.description</p>
+			<div class="meta">
+				<span>By: $item.author</span>
+				<span>Date: $item.date</span>
+			</div>
+			#if($item.hasComments)
+				<section class="comments">
+					#foreach($comment in $item.comments)
+					<div class="comment">
+						<strong>$comment.author</strong>
+						<p>$comment.text</p>
+					</div>
+					#end
+				</section>
+			#end
+		</article>
+		#end
+	</main>
 
-    <footer>
-        #include("footer.vm")
-        <p>&copy; 2025 $site.name. All rights reserved.</p>
-    </footer>
+	<footer>
+		#include("footer.vm")
+		<p>&copy; $year $site.name. All rights reserved.</p>
+	</footer>
 </body>
 </html>

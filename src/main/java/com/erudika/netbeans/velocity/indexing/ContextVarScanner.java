@@ -43,6 +43,8 @@ public final class ContextVarScanner {
 	private ContextVarScanner() {
 	}
 
+	private static final Set<FileObject> LISTENER_REGISTERED = ConcurrentHashMap.newKeySet();
+
 	public static void scanProject(Project project) {
 		if (project == null) {
 			return;
@@ -51,12 +53,26 @@ public final class ContextVarScanner {
 		if (projectDir == null) {
 			return;
 		}
+		// Allow rescan if previous scan stored empty results
 		if (!SCAN_TRIGGERED.add(projectDir)) {
-			return;
+			// Already triggered - check if we should allow retry (empty results)
+			List<ContextPutAnalyzer.ContextVarEntry> existing = ContextVarStore.load(projectDir);
+			if (!existing.isEmpty()) {
+				return; // Already have results, don't rescan
+			}
+			// Empty results - clear and retry
+			SCAN_TRIGGERED.remove(projectDir);
+			SCAN_TRIGGERED.add(projectDir);
 		}
 		RP.post(new ScanTask(projectDir));
 
-		FileUtil.addFileChangeListener(new ProjectFileListener(projectDir), FileUtil.toFile(projectDir));
+		// Register file listener only once per project
+		if (LISTENER_REGISTERED.add(projectDir)) {
+			java.io.File projectFile = FileUtil.toFile(projectDir);
+			if (projectFile != null) {
+				FileUtil.addFileChangeListener(new ProjectFileListener(projectDir), projectFile);
+			}
+		}
 	}
 
 	private static final class ScanTask implements Runnable {
@@ -71,17 +87,18 @@ public final class ContextVarScanner {
 		public void run() {
 			try {
 				List<ContextPutAnalyzer.ContextVarEntry> allEntries = new ArrayList<>();
-				collectJavaFiles(projectDir, allEntries);
+				int[] counts = {0, 0}; // [0]=total java files, [1]=successfully analyzed
+				collectJavaFiles(projectDir, allEntries, counts);
 				ContextVarStore.store(projectDir, allEntries);
-				LOG.log(Level.FINE, "Scanned {0} context variables from project {1}",
-						new Object[]{allEntries.size(), projectDir.getName()});
-			} catch (Exception ex) {
-				LOG.log(Level.WARNING, "Error scanning velocity context variables", ex);
+				LOG.log(Level.INFO, "Velocity context scan complete: found {0} variables from {1}/{2} Java files in project {3}",
+						new Object[]{allEntries.size(), counts[1], counts[0], projectDir.getName()});
+			} catch (Throwable ex) {
+				LOG.log(Level.WARNING, "Error scanning velocity context variables in " + projectDir.getName(), ex);
 				SCAN_TRIGGERED.remove(projectDir);
 			}
 		}
 
-		private void collectJavaFiles(FileObject dir, List<ContextPutAnalyzer.ContextVarEntry> entries) {
+		private void collectJavaFiles(FileObject dir, List<ContextPutAnalyzer.ContextVarEntry> entries, int[] counts) {
 			if (dir == null || !dir.isFolder()) {
 				return;
 			}
@@ -89,11 +106,15 @@ public final class ContextVarScanner {
 				if (child.isFolder()) {
 					String name = child.getNameExt();
 					if (!name.startsWith(".") && !SKIP_DIRS.contains(name)) {
-						collectJavaFiles(child, entries);
+						collectJavaFiles(child, entries, counts);
 					}
 				} else if (child.hasExt("java")) {
+					counts[0]++;
 					List<ContextPutAnalyzer.ContextVarEntry> fileEntries = ContextPutAnalyzer.analyze(child);
-					entries.addAll(fileEntries);
+					if (!fileEntries.isEmpty()) {
+						counts[1]++;
+						entries.addAll(fileEntries);
+					}
 				}
 			}
 		}

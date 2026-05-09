@@ -23,16 +23,20 @@ import com.sun.source.util.Trees;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import org.netbeans.api.java.source.CompilationController;
-import org.netbeans.api.java.source.Task;
 import org.netbeans.api.java.source.JavaSource;
+import org.netbeans.api.java.source.Task;
 import org.openide.filesystems.FileObject;
 
 public final class ContextPutAnalyzer {
+
+	private static final Logger LOG = Logger.getLogger(ContextPutAnalyzer.class.getName());
 
 	/** Velocity context types — direct put() calls. */
 	private static final Set<String> VELOCITY_CONTEXT_TYPES = Set.of(
@@ -67,6 +71,7 @@ public final class ContextPutAnalyzer {
 
 		JavaSource javaSource = JavaSource.forFileObject(javaFile);
 		if (javaSource == null) {
+			LOG.log(Level.FINE, "ContextPutAnalyzer: JavaSource unavailable for {0}", javaFile.getPath());
 			return List.of();
 		}
 
@@ -75,7 +80,7 @@ public final class ContextPutAnalyzer {
 			javaSource.runUserActionTask(new Task<CompilationController>() {
 				@Override
 				public void run(CompilationController controller) throws Exception {
-					controller.toPhase(JavaSource.Phase.ELEMENTS_RESOLVED);
+					controller.toPhase(JavaSource.Phase.RESOLVED);
 					if (controller.getFileObject() == null) {
 						return;
 					}
@@ -85,6 +90,7 @@ public final class ContextPutAnalyzer {
 				}
 			}, true);
 		} catch (Throwable ex) {
+			LOG.log(Level.WARNING, "ContextPutAnalyzer: Error analyzing " + javaFile.getNameExt(), ex);
 			return List.of();
 		}
 		return result[0];
@@ -112,15 +118,37 @@ public final class ContextPutAnalyzer {
 				receiver = mst.getExpression();
 			}
 			if (methodName != null && CONTEXT_PUT_METHODS.contains(methodName) && node.getArguments().size() >= 2) {
-				if (isTemplateContextType(receiver)) {
+				boolean isContextType = isTemplateContextType(receiver);
+				if (!isContextType && LOG.isLoggable(Level.FINE)) {
+					String receiverType = describeReceiverType(receiver);
+					LOG.log(Level.FINE, "ContextPutAnalyzer: {0}() on type ''{1}'' - not a context type",
+							new Object[]{methodName, receiverType});
+				}
+				if (isContextType) {
 					String varName = extractStringLiteral(node.getArguments().get(0));
 					if (varName != null) {
 						String typeName = resolveTypeName(node.getArguments().get(1));
-						entries.add(new ContextVarEntry(varName, typeName != null ? typeName : "java.lang.Object"));
+						entries.add(new ContextVarEntry(varName, typeName != null ? typeName : "Object"));
+						LOG.log(Level.FINE, "ContextPutAnalyzer: Found variable {0} of type {1}", new Object[]{varName, typeName});
 					}
 				}
 			}
 			return super.visitMethodInvocation(node, p);
+		}
+
+		private String describeReceiverType(ExpressionTree receiver) {
+			if (receiver == null) return "null";
+			try {
+				Trees trees = controller.getTrees();
+				TypeMirror type = trees.getTypeMirror(trees.getPath(controller.getCompilationUnit(), receiver));
+				if (type == null) return "unresolvable (TypeMirror null)";
+				Element el = controller.getTypes().asElement(type);
+				if (el == null) return type.toString() + " (asElement null)";
+				if (el instanceof TypeElement te) return te.getQualifiedName().toString();
+				return type.toString();
+			} catch (Throwable ex) {
+				return "error: " + ex.getMessage();
+			}
 		}
 
 		private boolean isTemplateContextType(ExpressionTree receiver) {

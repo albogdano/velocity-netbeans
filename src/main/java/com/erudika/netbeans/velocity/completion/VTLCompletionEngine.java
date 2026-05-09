@@ -47,6 +47,9 @@ import org.openide.util.lookup.Lookups;
 
 final class VTLCompletionEngine {
 
+	private static final java.util.logging.Logger LOG = java.util.logging.Logger.getLogger(VTLCompletionEngine.class.getName());
+	private static final java.util.logging.Level FINE = java.util.logging.Level.FINE;
+
 	private static final List<DirectiveTemplate> DIRECTIVES = List.of(
 			new DirectiveTemplate("#set", "#set($var = value)", "Variable assignment"),
 			new DirectiveTemplate("#macro", "#macro( $arg)\n\n#end", "Macro definition"),
@@ -177,7 +180,8 @@ final class VTLCompletionEngine {
 			}
 		}
 
-		for (VelocityContextSymbolProvider provider : Lookups.forPath("Services/VelocityContextSymbolProviders").lookupAll(VelocityContextSymbolProvider.class)) {
+		for (VelocityContextSymbolProvider provider : Lookups.forPath("Services/VelocityContextSymbolProviders").
+				lookupAll(VelocityContextSymbolProvider.class)) {
 			Collection<VelocityContextSymbol> provided = provider.getSymbols(fileObject);
 			if (provided == null) {
 				continue;
@@ -244,12 +248,14 @@ final class VTLCompletionEngine {
 	private static List<VTLCompletionProposal> completeDotMember(CompletionContext context, FileObject fileObject) {
 		DotExpressionParser.DotExpression dotExpr = context.dotExpression();
 		if (dotExpr == null || fileObject == null) {
+			LOG.log(FINE, "completeDotMember: null dotExpr={0} or fileObject={1}", new Object[]{dotExpr, fileObject});
 			return List.of();
 		}
 
 		// Resolve the base variable type
 		String baseType = TypeResolver.resolveVariableType(fileObject, dotExpr.baseVar());
 		if (baseType == null) {
+			LOG.log(FINE, "completeDotMember: could not resolve type for variable: {0}", dotExpr.baseVar());
 			return List.of();
 		}
 
@@ -261,12 +267,16 @@ final class VTLCompletionEngine {
 			finalType = TypeResolver.resolveChain(fileObject, baseType, dotExpr.methodChain());
 		}
 		if (finalType == null) {
+			LOG.log(FINE, "completeDotMember: chain resolution failed for {0}", dotExpr.methodChain());
 			return List.of();
 		}
+
+		LOG.log(FINE, "completeDotMember: resolving members for type {0}", finalType);
 
 		// Get members of the final type
 		List<ResolvedMember> members = TypeResolver.getMembers(fileObject, finalType);
 		if (members.isEmpty()) {
+			LOG.log(FINE, "completeDotMember: no members found for type {0}", finalType);
 			return List.of();
 		}
 
@@ -279,8 +289,7 @@ final class VTLCompletionEngine {
 			}
 
 			if (member.isProperty()) {
-				String description = member.returnTypeDisplay()
-						+ (member.derivedFrom() != null ? "  \u2190 " + member.derivedFrom() : "");
+				String description = TypeResolver.typeDisplayName(member.returnTypeDisplay());
 				String insertText = member.name();
 				int priority = member.isLowPriority() ? 30 : 5;
 				put(proposals, "p:" + member.name(), new VTLCompletionProposal(
@@ -288,7 +297,7 @@ final class VTLCompletionEngine {
 						VTLCompletionItem.ItemType.PROPERTY, priority,
 						context.replaceOffset(), context.replaceLength()));
 			} else if (member.isMethod()) {
-				String description = "\u2192 " + member.returnTypeDisplay();
+				String description = TypeResolver.typeDisplayName(member.returnTypeDisplay());
 				String insertText = member.paramCount() > 0
 						? member.name() + "(" : member.name() + "()";
 				int priority = member.isLowPriority() ? 50 : 20;

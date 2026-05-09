@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -132,6 +131,7 @@ public final class TypeResolver {
 	 */
 	public static List<ResolvedMember> getMembers(FileObject contextFile, String typeName) {
 		if (typeName == null || contextFile == null) {
+			LOG.log(Level.FINE, "getMembers: null input (contextFile={0}, typeName={1})", new Object[]{contextFile, typeName});
 			return List.of();
 		}
 		String rawType = stripGenerics(typeName);
@@ -145,11 +145,15 @@ public final class TypeResolver {
 		// Resolve via Java Source API
 		FileObject javaFile = findJavaSourceFile(contextFile);
 		if (javaFile == null) {
+			LOG.log(Level.INFO, "Velocity type resolution: No Java source file found in project for context: {0}. "
+					+ "Method completion requires at least one .java file in the project.", contextFile.getPath());
 			return List.of();
 		}
 
 		JavaSource javaSource = JavaSource.forFileObject(javaFile);
 		if (javaSource == null) {
+			LOG.log(Level.INFO, "Velocity type resolution: Java source infrastructure not available for: {0}. "
+					+ "Try again after the IDE finishes indexing.", javaFile.getPath());
 			return List.of();
 		}
 
@@ -159,13 +163,14 @@ public final class TypeResolver {
 				controller.toPhase(JavaSource.Phase.ELEMENTS_RESOLVED);
 				TypeElement typeElement = controller.getElements().getTypeElement(rawType);
 				if (typeElement == null) {
+					LOG.log(Level.WARNING, "TypeResolver: getTypeElement returned null for: {0}", rawType);
 					result.put("result", List.of());
 					return;
 				}
 				result.put("result", collectMembers(controller, typeElement));
 			}, true);
 		} catch (Throwable ex) {
-			LOG.log(Level.FINE, "Failed to resolve members for type: " + rawType, ex);
+			LOG.log(Level.WARNING, "TypeResolver: Failed to resolve members for type: " + rawType, ex);
 			return List.of();
 		}
 
@@ -302,27 +307,32 @@ public final class TypeResolver {
 		return Character.toUpperCase(str.charAt(0)) + str.substring(1);
 	}
 
+	public static String typeDisplayName(String type) {
+		if (type == null) {
+			return "Object";
+		}
+		// Show simple name for readability
+		int lastDot = type.lastIndexOf('.');
+		if (lastDot >= 0) {
+			// Handle generics: java.util.List<java.lang.String> → List<String>
+			// Simple approach: just take after last package dot before any < or end
+			int angleIdx = type.indexOf('<');
+			if (angleIdx < 0) {
+				return type.substring(lastDot + 1);
+			}
+			String basePart = type.substring(0, angleIdx + 1);
+			int baseLastDot = basePart.lastIndexOf('.');
+			return (baseLastDot >= 0 ? basePart.substring(baseLastDot + 1) : basePart)
+					+ simplifyGenerics(type.substring(angleIdx));
+		}
+		return type;
+	}
+
 	private static String typeDisplayName(TypeMirror type) {
 		if (type == null || type.getKind() == TypeKind.ERROR || type.getKind() == TypeKind.NONE) {
 			return "Object";
 		}
-		String raw = type.toString();
-		// Show simple name for readability
-		int lastDot = raw.lastIndexOf('.');
-		if (lastDot >= 0) {
-			// Handle generics: java.util.List<java.lang.String> → List<String>
-			String simplified = raw;
-			// Simple approach: just take after last package dot before any < or end
-			int angleIdx = raw.indexOf('<');
-			if (angleIdx < 0) {
-				return raw.substring(lastDot + 1);
-			}
-			String basePart = raw.substring(0, angleIdx);
-			int baseLastDot = basePart.lastIndexOf('.');
-			return (baseLastDot >= 0 ? basePart.substring(baseLastDot + 1) : basePart)
-					+ simplifyGenerics(raw.substring(angleIdx));
-		}
-		return raw;
+		return typeDisplayName(type.toString());
 	}
 
 	private static String simplifyGenerics(String generics) {

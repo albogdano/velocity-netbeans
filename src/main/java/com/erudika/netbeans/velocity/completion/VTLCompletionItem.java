@@ -38,11 +38,15 @@ public class VTLCompletionItem implements org.netbeans.spi.editor.completion.Com
 	ImageIcon hashBlueIco = new ImageIcon(ImageUtilities.loadImage("com/erudika/netbeans/velocity/hash-blue.png"));
 	ImageIcon hashDBlueIco = new ImageIcon(ImageUtilities.loadImage("com/erudika/netbeans/velocity/hash-dblue.png"));
 	ImageIcon hashOrangeIco = new ImageIcon(ImageUtilities.loadImage("com/erudika/netbeans/velocity/hash-orange.png"));
+
 	ImageIcon macroWhiteIco = new ImageIcon(ImageUtilities.loadImage("com/erudika/netbeans/velocity/macro-white.png"));
 	ImageIcon macroBlueIco = new ImageIcon(ImageUtilities.loadImage("com/erudika/netbeans/velocity/macro-blue.png"));
 	ImageIcon macroOrangeIco = new ImageIcon(ImageUtilities.loadImage("com/erudika/netbeans/velocity/macro-orange.png"));
+
+	ImageIcon varWhiteIco = new ImageIcon(ImageUtilities.loadImage("com/erudika/netbeans/velocity/var-white.png"));
 	ImageIcon varBlueIco = new ImageIcon(ImageUtilities.loadImage("com/erudika/netbeans/velocity/var-blue.png"));
 	ImageIcon varOrangeIco = new ImageIcon(ImageUtilities.loadImage("com/erudika/netbeans/velocity/var-orange.png"));
+
 	ImageIcon operatorIco = new ImageIcon(ImageUtilities.loadImage("com/erudika/netbeans/velocity/operator.png"));
 
 	Color blue = Color.decode("#007dda");
@@ -155,9 +159,9 @@ public class VTLCompletionItem implements org.netbeans.spi.editor.completion.Com
 //		sb.append("<font color='#0066cc'>");
 //		sb.append(proposal.getType().getLabel());
 //		sb.append("</font> ");
-		sb.append("<b>");
+//		sb.append("<b>");
 		sb.append(proposal.getName());
-		sb.append("</b>");
+//		sb.append("</b>");
 //		sb.append("</html>");
 		return sb.toString();
 	}
@@ -167,7 +171,7 @@ public class VTLCompletionItem implements org.netbeans.spi.editor.completion.Com
 //		sb.append("<html>");
 		if (proposal.getDescription() != null && !proposal.getDescription().isEmpty()) {
 			sb.append(" <font color='#").append(Integer.toHexString(defaultForeground.getRGB()).substring(2)).append("'>");
-			sb.append(proposal.getDescription());
+			sb.append(proposal.getDescription().replaceAll("<", "&lt;").replaceAll(">", "&gt;"));
 			sb.append("</font>");
 		}
 //		sb.append("</html>");
@@ -178,7 +182,7 @@ public class VTLCompletionItem implements org.netbeans.spi.editor.completion.Com
 		String desc = proposal.getDescription().toLowerCase();
 		switch (proposal.getType()) {
 			case DIRECTIVE:
-				return proposal.getDescription().contains("Velocimacro") ?
+				return desc.contains("velocimacro") ?
 						(selected ? macroWhiteIco : macroBlueIco) :
 						(selected ? hashWhiteIco : hashBlueIco);
 			case KEYWORD:
@@ -186,9 +190,9 @@ public class VTLCompletionItem implements org.netbeans.spi.editor.completion.Com
 			case OPERATOR:
 				return operatorIco;
 			case REFERENCE:
-				return desc.contains("context variable") || proposal.getInsertText().startsWith("$foreach.") ? varOrangeIco : varBlueIco;
+				return selected ? varWhiteIco : proposal.getInsertText().startsWith("$foreach.") ? varOrangeIco : varBlueIco;
 			case PROPERTY:
-				return varBlueIco;
+				return selected ? varWhiteIco : varBlueIco;
 			case METHOD:
 				return selected ? macroWhiteIco : macroBlueIco;
 			default:
@@ -207,9 +211,10 @@ public class VTLCompletionItem implements org.netbeans.spi.editor.completion.Com
 				case KEYWORD:
 					return darkorange;
 				case OPERATOR:
-					return defaultForeground;
+					return darkorange;
 				case REFERENCE:
-					return desc.contains("context variable") || proposal.getInsertText().startsWith("$foreach.") ? orange : defaultForeground;
+					return proposal.getInsertText().startsWith("$foreach.") ? orange :
+							(desc.contains("context variable") ? blue : defaultForeground);
 				case PROPERTY:
 					return blue;
 				case METHOD:

@@ -47,15 +47,24 @@ public class JavaDerivedContextSymbolProvider implements VelocityContextSymbolPr
 
 		List<ContextPutAnalyzer.ContextVarEntry> entries = ContextVarStore.load(projectDir);
 		if (entries.isEmpty()) {
+			// Always trigger scan when no results - handles first run and stale empty cache
 			ContextVarScanner.scanProject(project);
 			return List.of();
 		}
 
 		List<VelocityContextSymbol> symbols = new ArrayList<>();
 		for (ContextPutAnalyzer.ContextVarEntry entry : entries) {
-			String description = "Java Context variable \u2192 " + entry.typeName();
+			String description = "App Context variable: " + TypeResolver.typeDisplayName(entry.typeName());
 			symbols.add(new VelocityContextSymbol(entry.varName(), description));
 		}
 		return symbols;
+	}
+
+	private static String getDisplayType(String t) {
+		if (t != null) {
+			int dot = t.lastIndexOf('.');
+			return dot >= 0 ? t.substring(dot + 1) : t;
+		}
+		return t;
 	}
 }

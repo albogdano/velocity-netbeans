@@ -35,6 +35,11 @@ final class VTLCompletionQuery extends AsyncCompletionQuery {
 			boolean allowInCurrentContext = shouldOfferVelocityCompletion(document, caretOffset, prefix);
 			FileObject fileObject = extractFileObject(document);
 
+			java.util.logging.Logger.getLogger(VTLCompletionQuery.class.getName()).log(
+					java.util.logging.Level.FINE,
+					"VTLCompletionQuery: caretOffset={0}, prefix=''{1}'', allowInContext={2}, fileObject={3}",
+					new Object[]{caretOffset, prefix, allowInCurrentContext, fileObject});
+
 			for (VTLCompletionProposal proposal : VTLCompletionEngine.complete(text, caretOffset, fileObject, allowInCurrentContext)) {
 				resultSet.addItem(new VTLCompletionItem(proposal));
 			}

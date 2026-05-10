@@ -26,7 +26,6 @@ import com.erudika.netbeans.velocity.jcclexer.VelocityParserTokenManager;
 import com.erudika.netbeans.velocity.jcclexer.node.ASTForEachStatement;
 import com.erudika.netbeans.velocity.jcclexer.node.ASTIdentifier;
 import com.erudika.netbeans.velocity.jcclexer.node.ASTMacroStatement;
-import com.erudika.netbeans.velocity.jcclexer.node.ASTReference;
 import com.erudika.netbeans.velocity.jcclexer.node.ASTSetDirective;
 import com.erudika.netbeans.velocity.jcclexer.node.SimpleNode;
 import com.erudika.netbeans.velocity.jcclexer.node.VelocityAnalyser;
@@ -195,8 +194,9 @@ final class VTLCompletionEngine {
 			}
 		}
 
-		addReferenceSymbols(proposals, symbols.declaredReferences(), "Variable", 10, filter, context);
-		addReferenceSymbols(proposals, symbols.observedReferences(), "Local variable", 20, filter, context);
+		addReferenceSymbols(proposals, symbols.declaredReferences(), "Local variable", 10, filter, context);
+		// this produces confusing and incorrect suggestions like $isEmpty if a line like this is present "$stringVar.isEmpty()"
+		// addReferenceSymbols(proposals, symbols.observedReferences(), "Local variable", 20, filter, context);
 	}
 
 	private static void addReferenceSymbols(Map<String, VTLCompletionProposal> proposals, Set<String> symbols,
@@ -392,7 +392,7 @@ final class VTLCompletionEngine {
 					case VelocityParserConstants.IDENTIFIER:
 						String reference = normalizeReference(token.image);
 						if (reference != null) {
-							symbols.observedReferences.add(reference);
+							//symbols.observedReferences.add(reference);
 							if (expectForeachVar || expectSetTarget) {
 								symbols.declaredReferences.add(reference);
 							}
@@ -594,7 +594,7 @@ final class VTLCompletionEngine {
 	private static final class TemplateSymbols {
 		private final LinkedHashSet<String> macros = new LinkedHashSet<String>();
 		private final LinkedHashSet<String> declaredReferences = new LinkedHashSet<String>();
-		private final LinkedHashSet<String> observedReferences = new LinkedHashSet<String>();
+//		private final LinkedHashSet<String> observedReferences = new LinkedHashSet<String>();
 
 		Set<String> macros() {
 			return macros;
@@ -604,9 +604,9 @@ final class VTLCompletionEngine {
 			return declaredReferences;
 		}
 
-		Set<String> observedReferences() {
-			return observedReferences;
-		}
+//		Set<String> observedReferences() {
+//			return observedReferences;
+//		}
 	}
 
 	private static final class SymbolCollector extends VelocityAnalyser {
@@ -656,14 +656,14 @@ final class VTLCompletionEngine {
 			return node.childrenAccept(this, data);
 		}
 
-		@Override
-		public Object visit(ASTReference node, Object data) {
-			String reference = normalizeReference(node.getFirstToken() != null ? node.getFirstToken().image : null);
-			if (reference != null) {
-				symbols.observedReferences.add(reference);
-			}
-			return node.childrenAccept(this, data);
-		}
+//		@Override
+//		public Object visit(ASTReference node, Object data) {
+//			String reference = normalizeReference(node.getFirstToken() != null ? node.getFirstToken().image : null);
+//			if (reference != null) {
+//				symbols.observedReferences.add(reference);
+//			}
+//			return node.childrenAccept(this, data);
+//		}
 
 		@Override
 		public void openTransaction() {

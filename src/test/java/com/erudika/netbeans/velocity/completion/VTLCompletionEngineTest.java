@@ -103,12 +103,12 @@ class VTLCompletionEngineTest {
 		assertContains(proposals, "$item");
 	}
 
-	@Test
-	void completesObservedReferences() {
-		String template = "$user.name\n$u";
-		List<VTLCompletionProposal> proposals = VTLCompletionEngine.complete(template, template.length(), null, true);
-		assertContains(proposals, "$user");
-	}
+//	@Test
+//	void completesObservedReferences() {
+//		String template = "$user.name\n$u";
+//		List<VTLCompletionProposal> proposals = VTLCompletionEngine.complete(template, template.length(), null, true);
+//		assertContains(proposals, "$user");
+//	}
 
 	@Test
 	void completesConfiguredExternalSymbols() {

@@ -26,6 +26,7 @@ import java.util.logging.Logger;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.StyledDocument;
 import org.netbeans.api.editor.fold.Fold;
+import org.netbeans.api.editor.fold.FoldTemplate;
 import org.netbeans.api.editor.fold.FoldType;
 import org.netbeans.spi.editor.fold.FoldHierarchyTransaction;
 import org.netbeans.spi.editor.fold.FoldOperation;
@@ -45,14 +46,6 @@ class VTLFoldAnalyser extends VelocityAnalyser
    private FoldHierarchyTransaction     m_Transaction;
    private boolean                      m_TransactionValid;
 
-   /**
-    * Creates new {@code VTLFoldAnalyser}.
-    *
-    * @param operation a reference to the fold operation this analyzer acts on.
-    *        must not be {@code null}.
-    * @param currentFolds a reference to a map of currently added folds.
-    *        Must not be {@code null}.
-    */
    VTLFoldAnalyser(final FoldOperation operation, final Map<VTLFoldInfo, Fold> currentFolds)
    {
       m_Operation    = operation;
@@ -60,41 +53,26 @@ class VTLFoldAnalyser extends VelocityAnalyser
       m_Document     = (StyledDocument)m_Operation.getHierarchy().getComponent().getDocument();
    }
 
-   /**
-    * {@inheritDoc}
-    */
    @Override public Object visit(final ASTMacroStatement node, final Object oData)
    {
       return(visitImpl(node, oData));
    }
 
-   /**
-    * {@inheritDoc}
-    */
    @Override public Object visit(final ASTForEachStatement node, final Object oData)
    {
       return(visitImpl(node, oData));
    }
 
-   /**
-    * {@inheritDoc}
-    */
    @Override public Object visit(final ASTIfStatement node, final Object oData)
    {
       return(visitImpl(node, oData));
    }
 
-   /**
-    * {@inheritDoc}
-    */
    @Override public Object visit(final ASTElseIfStatement node, final Object oData)
    {
       return(visitImpl(node, oData));
    }
 
-   /**
-    * {@inheritDoc}
-    */
    @Override public Object visit(final ASTElseStatement node, final Object oData)
    {
       return(visitImpl(node, oData));
@@ -121,7 +99,7 @@ class VTLFoldAnalyser extends VelocityAnalyser
 
             if (oldFold == null)
             {
-               final Fold fold = m_Operation.addToHierarchy(new FoldType(firstToken.image), strDesc, false, iStart, iEnd, 0, 0, info, m_Transaction);
+               final Fold fold = m_Operation.addToHierarchy(FoldType.CODE_BLOCK, iStart, iEnd, false, FoldTemplate.DEFAULT_BLOCK, strDesc, info, m_Transaction);
                m_CurrentFolds.put(info, fold);
             }
             else
@@ -136,9 +114,6 @@ class VTLFoldAnalyser extends VelocityAnalyser
       return(node.childrenAccept(this, oData));
    }
 
-   /**
-    * {@inheritDoc}
-    */
    @Override public void openTransaction()
    {
       m_TransactionValid = false;
@@ -162,9 +137,6 @@ class VTLFoldAnalyser extends VelocityAnalyser
          ((VTLFoldInfo)m_Operation.getExtraInfo(fold)).setState(VTLFoldInfo.State.UNTOUCHED);
    }
 
-   /**
-    * {@inheritDoc}
-    */
    @Override public void commitTransaction()
    {
       if (!m_TransactionValid)
@@ -173,7 +145,7 @@ class VTLFoldAnalyser extends VelocityAnalyser
          return;
       }
 
-      final Set<VTLFoldInfo> untouched = new HashSet<VTLFoldInfo>();
+      final Set<VTLFoldInfo> untouched = new HashSet<>();
 
       for (final Fold fold : m_CurrentFolds.values())
       {

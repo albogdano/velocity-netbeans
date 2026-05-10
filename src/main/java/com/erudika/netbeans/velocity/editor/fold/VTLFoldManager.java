@@ -16,6 +16,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.event.DocumentEvent;
 import javax.swing.text.BadLocationException;
+import javax.swing.text.Document;
 import javax.swing.text.StyledDocument;
 import org.netbeans.api.editor.fold.Fold;
 import org.netbeans.api.editor.fold.FoldHierarchyEvent;
@@ -61,7 +62,7 @@ public class VTLFoldManager implements FoldManager, FoldHierarchyListener
    @Override public void initFolds(final FoldHierarchyTransaction transaction)
    {
 
-      final DataObject localDataObject = (DataObject)m_Operation.getHierarchy().getComponent().getDocument().getProperty("stream");
+      final DataObject localDataObject = (DataObject)m_Operation.getHierarchy().getComponent().getDocument().getProperty(Document.StreamDescriptionProperty);
 
       if (localDataObject != null)
       {

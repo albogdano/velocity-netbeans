@@ -11,7 +11,9 @@ package com.erudika.netbeans.velocity;
 
 import java.io.IOException;
 import org.openide.filesystems.FileObject;
+import org.openide.filesystems.MIMEResolver;
 import org.openide.loaders.DataNode;
+import org.openide.loaders.DataObject;
 import org.openide.loaders.DataObjectExistsException;
 import org.openide.loaders.MultiDataObject;
 import org.openide.loaders.MultiFileLoader;
@@ -24,10 +26,10 @@ import org.openide.util.Lookup;
 /**
  * Provides support for handling of data objects with multiple files.
  *
- * @author <a href="mailto:werner.jaeger@t-systems.com">Werner Jaeger</a>
+ * @author <a href="mailto:werner.jaeger@t-systems.com">Werner Jäger</a>
  */
-//@MIMEResolver.ExtensionRegistration(displayName = "#LBL_VTL_loader_name", extension = {"vm", "vsl"}, mimeType = "text/x-velocity", position = 1309)
-//@Registration(mimeType = "text/x-velocity", iconBase = "com/erudika/netbeans/velocity/VelocityFiles16.png", displayName = "#LBL_VTL_loader_name")
+@MIMEResolver.ExtensionRegistration(displayName = "#LBL_VTL_loader_name", extension = {"vm", "vsl"}, mimeType = "text/x-velocity", position = 1309)
+@DataObject.Registration(mimeType = "text/x-velocity", iconBase = "com/erudika/netbeans/velocity/VelocityFiles16.png", displayName = "#LBL_VTL_loader_name")
 public class VTLDataObject extends MultiDataObject {
 
 	private static final long serialVersionUID = 1L;

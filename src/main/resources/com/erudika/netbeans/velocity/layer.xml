@@ -24,11 +24,6 @@
 				<folder name="UpToDateStatusProvider">
 					<file name="com-erudika-netbeans-velocity-parser-VTLUpToDateStatusProviderFactory.instance"/>
 				</folder>
-				<folder name="SideBar">
-					<file name="com-erudika-netbeans-velocity-editor-fold-VTLCodeFoldingSideBarFactory.instance">
-						<attr name="position" intvalue="1500"/>
-					</file>
-				</folder>
 				<folder name="FoldManager">
 					<file name="com-erudika-netbeans-velocity-editor-fold-VTLFoldManagerFactory.instance"/>
 				</folder>
@@ -176,12 +171,6 @@
 		</folder>
 	</folder>
 	<folder name="Services">
-		<folder name="MIMEResolver">
-			<file name="VTLResolver.xml" url="VTLResolver.xml">
-				<attr name="displayName" bundlevalue="com.erudika.netbeans.velocity.Bundle#Services/MIMEResolver/VTLResolver.xml"/>
-				<attr name="position" intvalue="1309"/>
-			</file>
-		</folder>
 		<folder name="VelocityContextSymbolProviders">
 			<file name="com-erudika-netbeans-velocity-completion-JavaDerivedContextSymbolProvider.instance">
 				<attr name="instanceCreate" methodvalue="com.erudika.netbeans.velocity.completion.JavaDerivedContextSymbolProvider.create"/>

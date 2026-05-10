@@ -19,18 +19,24 @@
   <a href="#known-issues">Known Issues</a>
 </p>
 
-
 ## What it is
 
-Velocity is a mature and robust templating language for the JVM. NetBeans used to have pretty good plugins which added some
+This is plugin for <a href="https://netbeans.apache.org/">Apache NetBeans</a> that provides full editor support for
+<a href="https://velocity.apache.org/">Apache Velocity Template Language</a> (VTL) files (`.vm` and `.vsl` extensions).
+
+Velocity is a mature and robust templating language for the JVM. NetBeans used to have pretty good plugins which added
 support for Velocity but through the years those projects were abandoned and NetBeans was left without a proper plugin.
-This project aims to fix that and provide an advanced plugin for <a href="https://netbeans.apache.org/">Apache NetBeans</a>
-that provides editor support for <a href="https://velocity.apache.org/">Apache Velocity Template Language</a> (VTL)
-files (`.vm` and `.vsl` extensions).
+I looked for alternatives and there were some - the very basic plugin for VS Code which does not allow mixing HTML + VTL1
+in the same file. Then there was IntelliJ with pretty good integration out of the box. For some time I was envious that
+IntelliJ had better Velocity support than NetBeans. So, I decided to bring the missing Velocity plugin back to NetBeans.
 
 [![Screenshot](img/screen1.png)](img/screen1.png)
 
-### Features
+**Note:** The project was vibe-coded over a long weekend using a combination of OpenCode + GLM/Opus and cost me around **$60**.
+If you like it or find it useful, please share it and give it a star. There may still be issues, so please
+[report them here](https://github.com/albogdano/velocity-netbeans/issues).
+
+## Features
 
 - **Syntax highlighting** — 67 token types across 10 categories (keyword, directive, comment, string, operator, number, identifier, boolean, separator, unparsed content)
 - **Error highlighting** — real-time syntax error detection with error stripe annotations
@@ -52,12 +58,12 @@ files (`.vm` and `.vsl` extensions).
 - **Configurable type mappings** — define variable types in the options panel for projects where automatic scanning isn't available
 - **File templates** — New file templates for Velocity Template (.vsl) and Velocity Macro (.vm)
 
-### Requirements
+## Requirements
 
 - **Apache NetBeans 22+** (built against RELEASE280)
 - **Java 21+**
 
-### How to Build
+## How to Build
 
 ```bash
 # Build the module (produces .nbm file)
@@ -67,26 +73,26 @@ mvn clean install
 # target/nbm/velocity-netbeans-1.0.0-SNAPSHOT.nbm
 ```
 
-### How to Use
+## How to Use
 
-#### Installation
+### Installation
 
 1. Build the NBM file: `mvn clean install`
 2. In NetBeans, go to **Tools > Plugins > Downloaded**
 3. Click **Add Plugins...** and select `target/nbm/velocity-netbeans-1.0.0-SNAPSHOT.nbm`
 4. Click **Install** and restart NetBeans
 
-#### Basic Editing
+### Basic Editing
 
 Open any `.vm` or `.vsl` file. You get syntax highlighting, error detection, code folding, and braces matching out of the box.
 
-#### Autocompletion
+### Autocompletion
 
 - Type `#` to get directive completions
 - Type `$` to get reference/variable completions
 - Type `.` after a typed variable (e.g., `$user.`) to get method and property completions
 
-#### Method Completion (Dot-Completion)
+### Method Completion (Dot-Completion)
 
 For method/property suggestions to work, the plugin needs to know the Java type of each variable. This is resolved from:
 
@@ -99,7 +105,7 @@ Once types are known, typing `$user.` will show:
 
 Multi-level chaining is supported: `$user.getAddress().getCity().` resolves each return type in the chain.
 
-### Configuration
+## Configuration
 
 Go to **Options > Editor > Velocity Context** to configure:
 
@@ -108,7 +114,7 @@ Go to **Options > Editor > Velocity Context** to configure:
   - `$varName` — declares a variable (no type info, basic completion only)
   - `$varName:com.example.Type` — declares a variable with type (enables method/property completion)
 
-#### Supported Context Detection
+### Supported Context Detection
 
 The Java scanner automatically detects variables from these patterns:
 
@@ -130,12 +136,13 @@ Supported receiver types (and subclasses/implementations):
 - `org.springframework.ui.ModelMap`
 - `org.springframework.web.servlet.ModelAndView`
 
-### Known Issues
+## Known Issues
 
-- Macro argument count validation is not yet implemented (macro calls are not checked against their definitions)
+- Variable, property or method in double quotes are not recognized, e.g. `#set($var = "$myvar1, #mymacro()")`
 - Escaped variables/properties (`\$var`) may still show identifier coloring instead of text coloring
 - The first time a `.vm` file is opened in a project, Java context scanning runs asynchronously — completions from Java appear on the second invocation
+- Some other quirks like breakage for this kind of code: `#if($condition)echo " "#end#if($other) text #end` - easily fixed if `"` and `#end` are separated by space
 
-### License
+## License
 
 [CDDL 1.0](https://opensource.org/license/CDDL-1.0)

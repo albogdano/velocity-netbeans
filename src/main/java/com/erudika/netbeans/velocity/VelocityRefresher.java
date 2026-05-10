@@ -23,28 +23,30 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.SwingUtilities;
-import javax.swing.Timer;
-import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.StyledDocument;
 import org.openide.cookies.EditorCookie;
 import org.openide.filesystems.FileObject;
 import org.openide.loaders.DataObject;
-import org.openide.text.NbDocument;
 import org.openide.windows.TopComponent;
 
 /**
- * Utility that clears stale caches and forces re-lex/re-parse of all open
- * VTL editor documents. Called when the macro library configuration changes
- * in the Options panel so that new macros are highlighted and clickable
- * immediately.
+ * Utility that clears stale caches, re-registers library macros, and forces
+ * re-lex/re-parse of all open VTL editor documents. Called when the macro
+ * library configuration changes in the Options panel.
+ *
+ * <p>Re-lex is triggered by closing and reopening each editor tab, which is
+ * the only reliable way to force full re-tokenization without conflicting
+ * with the fold hierarchy's transaction model. Direct document modification
+ * (insert+remove) was previously used but caused
+ * {@code IllegalStateException: Active transaction already exists} in the
+ * fold hierarchy because {@code NbDocument.runAtomicAsUser()} acquires an
+ * atomic lock that conflicts with ongoing fold transactions.</p>
  */
 public final class VelocityRefresher {
 
 	private static final Logger LOG = Logger.getLogger(VelocityRefresher.class.getName());
 	private static final String VTL_MIME = VTLParser.VTL_MIME_TYPE;
-	private static final int RELEX_DELAY_MS = 500;
-	private static final int MAX_RETRIES = 8;
 
 	private VelocityRefresher() {
 	}
@@ -52,39 +54,40 @@ public final class VelocityRefresher {
 	/**
 	 * Clears macro-related caches, re-registers library macros from the
 	 * configured library files, and forces re-lex/re-parse of all open VTL
-	 * editors. Call this after the macro library path is changed in the
-	 * Options panel.
+	 * editors by closing and reopening each editor tab.
+	 *
+	 * <p>Call this after the macro library path is changed in the Options
+	 * panel.</p>
 	 */
 	public static void refreshAllVTLEditors() {
 		VelocityParser.clearLibraryMacroNames();
 		MacroLibraryScanner.clearCache();
 
-		List<StyledDocument> docs = findAllOpenVTLDocusments();
-		for (StyledDocument doc : docs) {
-			FileObject fo = getFileObject(doc);
-			if (fo != null) {
-				for (MacroLibraryScanner.MacroInfo macro : MacroLibraryScanner.getMacros(fo)) {
-					VelocityParser.addLibraryMacroName(macro.name());
-				}
+		List<DataObject> vtlFiles = new ArrayList<>();
+		List<EditorCookie> cookies = new ArrayList<>();
+
+		for (TopComponent tc : TopComponent.getRegistry().getOpened()) {
+			EditorCookie ec = tc.getLookup().lookup(EditorCookie.class);
+			if (ec == null) continue;
+			StyledDocument doc = ec.getDocument();
+			if (doc == null) continue;
+			if (!isVTLDocument(doc)) continue;
+
+			Object streamDesc = doc.getProperty(Document.StreamDescriptionProperty);
+			if (!(streamDesc instanceof DataObject dob)) continue;
+
+			for (MacroLibraryScanner.MacroInfo macro : MacroLibraryScanner.getMacros(dob.getPrimaryFile())) {
+				VelocityParser.addLibraryMacroName(macro.name());
 			}
+
+			vtlFiles.add(dob);
+			cookies.add(ec);
 		}
 
-		for (StyledDocument doc : docs) {
-			scheduleRelex(doc);
-		}
-	}
-
-	/**
-	 * Schedules a re-lex for a document by performing a minimal edit
-	 * (insert+remove at position 0) to invalidate the token cache. Uses
-	 * retry logic with increasing delays to handle fold hierarchy conflicts.
-	 *
-	 * @param doc the document to re-lex, must not be null
-	 */
-	public static void scheduleRelex(Document doc) {
-		if (!(doc instanceof StyledDocument sdoc)) return;
-
-		SwingUtilities.invokeLater(() -> forceRelexWithRetry(sdoc, 0));
+		// Close and reopen each editor on the EDT with a delay between
+		// operations to let the fold hierarchy settle. This forces a full
+		// re-lex with the freshly registered macro names.
+		SwingUtilities.invokeLater(() -> reopenEditors(cookies, 0));
 	}
 
 	/**
@@ -102,53 +105,23 @@ public final class VelocityRefresher {
 		return false;
 	}
 
-	private static void forceRelexWithRetry(StyledDocument sdoc, int attempt) {
-		try {
-			NbDocument.runAtomicAsUser(sdoc, () -> {
-				try {
-					sdoc.insertString(0, " ", null);
-					sdoc.remove(0, 1);
-				} catch (BadLocationException ex) {
-					LOG.log(Level.FINE, "Failed to re-lex VTL document", ex);
-				}
-			});
-		} catch (BadLocationException ex) {
-			LOG.log(Level.FINE, "Failed to re-lex VTL document", ex);
-		} catch (IllegalStateException ex) {
-			if (attempt < MAX_RETRIES) {
-				int delay = RELEX_DELAY_MS * (attempt + 1);
-				LOG.log(Level.FINE, "Fold hierarchy busy, retrying re-lex in {0}ms (attempt {1})", new Object[]{delay, attempt + 1});
-				Timer timer = new Timer(delay, e -> forceRelexWithRetry(sdoc, attempt + 1));
-				timer.setRepeats(false);
-				timer.start();
-			} else {
-				LOG.log(Level.WARNING, "Could not re-lex VTL document after " + MAX_RETRIES + " attempts", ex);
-			}
-		}
-	}
+	/**
+	 * Closes and reopens each editor cookie sequentially with delays to
+	 * avoid conflicting with the fold hierarchy. Each close+open cycle
+	 * forces a complete re-lex of the document with the newly registered
+	 * library macros.
+	 */
+	private static void reopenEditors(List<EditorCookie> cookies, int index) {
+		if (index >= cookies.size()) return;
 
-	private static List<StyledDocument> findAllOpenVTLDocusments() {
-		List<StyledDocument> docs = new ArrayList<>();
-		for (TopComponent tc : TopComponent.getRegistry().getOpened()) {
-			EditorCookie ec = tc.getLookup().lookup(EditorCookie.class);
-			if (ec == null) continue;
-			StyledDocument doc = ec.getDocument();
-			if (doc == null) continue;
-			if (isVTLDocument(doc)) {
-				docs.add(doc);
-			}
-		}
-		return docs;
-	}
-
-	private static FileObject getFileObject(Document doc) {
-		Object streamDesc = doc.getProperty(Document.StreamDescriptionProperty);
-		if (streamDesc instanceof DataObject dob) {
-			return dob.getPrimaryFile();
-		}
-		if (streamDesc instanceof FileObject fo) {
-			return fo;
-		}
-		return null;
+		EditorCookie ec = cookies.get(index);
+		ec.close();
+		// Delay before reopening to let fold hierarchy clean up
+		javax.swing.Timer timer = new javax.swing.Timer(300, e -> {
+			ec.open();
+			reopenEditors(cookies, index + 1);
+		});
+		timer.setRepeats(false);
+		timer.start();
 	}
 }

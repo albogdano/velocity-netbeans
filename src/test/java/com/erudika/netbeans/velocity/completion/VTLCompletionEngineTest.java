@@ -396,6 +396,125 @@ class VTLCompletionEngineTest {
 		assertEquals(VTLCompletionItem.ItemType.KEYWORD, inProposal.getType());
 	}
 
+	// ---- Type inference ----
+
+	@Test
+	void infersStringTypeFromStringLiteral() {
+		String template = "#set($name = \"hello\")\n$na";
+		List<VTLCompletionProposal> proposals = VTLCompletionEngine.complete(template, template.length(), null, true);
+		VTLCompletionProposal nameProposal = proposals.stream()
+				.filter(p -> "$name".equals(p.getName()))
+				.findFirst()
+				.orElse(null);
+		assertNotNull(nameProposal);
+		assertTrue(nameProposal.getDescription().toLowerCase().contains("string"),
+				() -> "Expected 'String' in description but got: " + nameProposal.getDescription());
+	}
+
+	@Test
+	void infersIntegerTypeFromIntegerLiteral() {
+		String template = "#set($count = 42)\n$co";
+		List<VTLCompletionProposal> proposals = VTLCompletionEngine.complete(template, template.length(), null, true);
+		VTLCompletionProposal countProposal = proposals.stream()
+				.filter(p -> "$count".equals(p.getName()))
+				.findFirst()
+				.orElse(null);
+		assertNotNull(countProposal);
+		assertTrue(countProposal.getDescription().toLowerCase().contains("integer"),
+				() -> "Expected 'Integer' in description but got: " + countProposal.getDescription());
+	}
+
+	@Test
+	void infersBooleanTypeFromTrueLiteral() {
+		String template = "#set($active = true)\n$ac";
+		List<VTLCompletionProposal> proposals = VTLCompletionEngine.complete(template, template.length(), null, true);
+		VTLCompletionProposal activeProposal = proposals.stream()
+				.filter(p -> "$active".equals(p.getName()))
+				.findFirst()
+				.orElse(null);
+		assertNotNull(activeProposal);
+		assertTrue(activeProposal.getDescription().toLowerCase().contains("boolean"),
+				() -> "Expected 'Boolean' in description but got: " + activeProposal.getDescription());
+	}
+
+	@Test
+	void infersDoubleTypeFromFloatLiteral() {
+		String template = "#set($price = 3.14)\n$pr";
+		List<VTLCompletionProposal> proposals = VTLCompletionEngine.complete(template, template.length(), null, true);
+		VTLCompletionProposal priceProposal = proposals.stream()
+				.filter(p -> "$price".equals(p.getName()))
+				.findFirst()
+				.orElse(null);
+		assertNotNull(priceProposal);
+		assertTrue(priceProposal.getDescription().toLowerCase().contains("double"),
+				() -> "Expected 'Double' in description but got: " + priceProposal.getDescription());
+	}
+
+	@Test
+	void infersBooleanFromComparisonExpression() {
+		String template = "#set($flag = $a == $b)\n$fl";
+		List<VTLCompletionProposal> proposals = VTLCompletionEngine.complete(template, template.length(), null, true);
+		VTLCompletionProposal flagProposal = proposals.stream()
+				.filter(p -> "$flag".equals(p.getName()))
+				.findFirst()
+				.orElse(null);
+		assertNotNull(flagProposal);
+		assertTrue(flagProposal.getDescription().toLowerCase().contains("boolean"),
+				() -> "Expected 'Boolean' in description but got: " + flagProposal.getDescription());
+	}
+
+	@Test
+	void infersListTypeFromObjectArray() {
+		String template = "#set($items = [1, 2, 3])\n$it";
+		List<VTLCompletionProposal> proposals = VTLCompletionEngine.complete(template, template.length(), null, true);
+		VTLCompletionProposal itemsProposal = proposals.stream()
+				.filter(p -> "$items".equals(p.getName()))
+				.findFirst()
+				.orElse(null);
+		assertNotNull(itemsProposal);
+		assertTrue(itemsProposal.getDescription().toLowerCase().contains("list"),
+				() -> "Expected 'List' in description but got: " + itemsProposal.getDescription());
+	}
+
+	@Test
+	void infersMapTypeFromMapLiteral() {
+		String template = "#set($data = {\"key\": \"val\"})\n$da";
+		List<VTLCompletionProposal> proposals = VTLCompletionEngine.complete(template, template.length(), null, true);
+		VTLCompletionProposal dataProposal = proposals.stream()
+				.filter(p -> "$data".equals(p.getName()))
+				.findFirst()
+				.orElse(null);
+		assertNotNull(dataProposal);
+		assertTrue(dataProposal.getDescription().toLowerCase().contains("map"),
+				() -> "Expected 'Map' in description but got: " + dataProposal.getDescription());
+	}
+
+	@Test
+	void infersStringFromAddWithString() {
+		String template = "#set($msg = $a + \"!\")\n$ms";
+		List<VTLCompletionProposal> proposals = VTLCompletionEngine.complete(template, template.length(), null, true);
+		VTLCompletionProposal msgProposal = proposals.stream()
+				.filter(p -> "$msg".equals(p.getName()))
+				.findFirst()
+				.orElse(null);
+		assertNotNull(msgProposal);
+		assertTrue(msgProposal.getDescription().toLowerCase().contains("string"),
+				() -> "Expected 'String' in description but got: " + msgProposal.getDescription());
+	}
+
+	@Test
+	void fallsBackToLocalVariableDescriptionWhenTypeUnknown() {
+		String template = "#set($x = $unknown)\n$x";
+		List<VTLCompletionProposal> proposals = VTLCompletionEngine.complete(template, template.length(), null, true);
+		VTLCompletionProposal xProposal = proposals.stream()
+				.filter(p -> "$x".equals(p.getName()))
+				.findFirst()
+				.orElse(null);
+		assertNotNull(xProposal);
+		assertTrue(xProposal.getDescription().toLowerCase().contains("local variable"),
+				() -> "Expected 'Local variable' in description but got: " + xProposal.getDescription());
+	}
+
 	// ---- Helpers ----
 
 	private void assertContains(List<VTLCompletionProposal> proposals, String name) {

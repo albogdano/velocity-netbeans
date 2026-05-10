@@ -23,8 +23,33 @@ import com.erudika.netbeans.velocity.jcclexer.TokenMgrError;
 import com.erudika.netbeans.velocity.jcclexer.VelocityParser;
 import com.erudika.netbeans.velocity.jcclexer.VelocityParserConstants;
 import com.erudika.netbeans.velocity.jcclexer.VelocityParserTokenManager;
+import com.erudika.netbeans.velocity.jcclexer.node.ASTAddNode;
+import com.erudika.netbeans.velocity.jcclexer.node.ASTAndNode;
+import com.erudika.netbeans.velocity.jcclexer.node.ASTDivNode;
+import com.erudika.netbeans.velocity.jcclexer.node.ASTEQNode;
+import com.erudika.netbeans.velocity.jcclexer.node.ASTExpression;
+import com.erudika.netbeans.velocity.jcclexer.node.ASTFalse;
+import com.erudika.netbeans.velocity.jcclexer.node.ASTFloatingPointLiteral;
 import com.erudika.netbeans.velocity.jcclexer.node.ASTForEachStatement;
+import com.erudika.netbeans.velocity.jcclexer.node.ASTGENode;
+import com.erudika.netbeans.velocity.jcclexer.node.ASTGTNode;
 import com.erudika.netbeans.velocity.jcclexer.node.ASTIdentifier;
+import com.erudika.netbeans.velocity.jcclexer.node.ASTIntegerLiteral;
+import com.erudika.netbeans.velocity.jcclexer.node.ASTIntegerRange;
+import com.erudika.netbeans.velocity.jcclexer.node.ASTLENode;
+import com.erudika.netbeans.velocity.jcclexer.node.ASTLTNode;
+import com.erudika.netbeans.velocity.jcclexer.node.ASTMap;
+import com.erudika.netbeans.velocity.jcclexer.node.ASTMethod;
+import com.erudika.netbeans.velocity.jcclexer.node.ASTModNode;
+import com.erudika.netbeans.velocity.jcclexer.node.ASTMulNode;
+import com.erudika.netbeans.velocity.jcclexer.node.ASTNENode;
+import com.erudika.netbeans.velocity.jcclexer.node.ASTNotNode;
+import com.erudika.netbeans.velocity.jcclexer.node.ASTObjectArray;
+import com.erudika.netbeans.velocity.jcclexer.node.ASTOrNode;
+import com.erudika.netbeans.velocity.jcclexer.node.ASTReference;
+import com.erudika.netbeans.velocity.jcclexer.node.ASTStringLiteral;
+import com.erudika.netbeans.velocity.jcclexer.node.ASTSubtractNode;
+import com.erudika.netbeans.velocity.jcclexer.node.ASTTrue;
 import com.erudika.netbeans.velocity.jcclexer.node.ASTMacroStatement;
 import com.erudika.netbeans.velocity.jcclexer.node.ASTSetDirective;
 import com.erudika.netbeans.velocity.jcclexer.node.SimpleNode;
@@ -85,8 +110,7 @@ final class VTLCompletionEngine {
 	static List<VTLCompletionProposal> complete(String text, int caretOffset, FileObject fileObject, boolean allowInCurrentContext) {
 		CompletionContext context = CompletionContext.analyze(text, caretOffset);
 		if (context.mode() == CompletionMode.DOT_MEMBER) {
-			// Dot-completion always allowed when a valid expression is detected
-			return completeDotMember(context, fileObject);
+			return completeDotMember(context, fileObject, text);
 		}
 		if (!allowInCurrentContext && !context.hasVelocityPrefix()) {
 			return List.of();
@@ -194,16 +218,20 @@ final class VTLCompletionEngine {
 			}
 		}
 
-		addReferenceSymbols(proposals, symbols.declaredReferences(), "Local variable", 10, filter, context);
+		addReferenceSymbols(proposals, symbols.declaredReferences(), symbols.declaredTypes(), "Local variable", 10, filter, context);
 		// this produces confusing and incorrect suggestions like $isEmpty if a line like this is present "$stringVar.isEmpty()"
 		// addReferenceSymbols(proposals, symbols.observedReferences(), "Local variable", 20, filter, context);
 	}
 
 	private static void addReferenceSymbols(Map<String, VTLCompletionProposal> proposals, Set<String> symbols,
-			String description, int priority, String filter, CompletionContext context) {
+			Map<String, String> types, String description, int priority, String filter, CompletionContext context) {
 		for (String symbol : symbols) {
 			if (matches(symbol, filter)) {
-				put(proposals, symbol, new VTLCompletionProposal(symbol, symbol, description,
+				String typeDesc = types.get(symbol);
+				String displayDesc = typeDesc != null
+						? TypeResolver.typeDisplayName(typeDesc)
+						: description;
+				put(proposals, symbol, new VTLCompletionProposal(symbol, symbol, displayDesc,
 						VTLCompletionItem.ItemType.REFERENCE, priority, context.replaceOffset(), context.replaceLength()));
 			}
 		}
@@ -247,15 +275,18 @@ final class VTLCompletionEngine {
 		}
 	}
 
-	private static List<VTLCompletionProposal> completeDotMember(CompletionContext context, FileObject fileObject) {
+	private static List<VTLCompletionProposal> completeDotMember(CompletionContext context, FileObject fileObject, String text) {
 		DotExpressionParser.DotExpression dotExpr = context.dotExpression();
 		if (dotExpr == null || fileObject == null) {
 			LOG.log(FINE, "completeDotMember: null dotExpr={0} or fileObject={1}", new Object[]{dotExpr, fileObject});
 			return List.of();
 		}
 
-		// Resolve the base variable type
 		String baseType = TypeResolver.resolveVariableType(fileObject, dotExpr.baseVar());
+		if (baseType == null) {
+			TemplateSymbols symbols = collectSymbols(text, fileObject);
+			baseType = symbols.declaredTypes().get(dotExpr.baseVar());
+		}
 		if (baseType == null) {
 			LOG.log(FINE, "completeDotMember: could not resolve type for variable: {0}", dotExpr.baseVar());
 			return List.of();
@@ -594,7 +625,7 @@ final class VTLCompletionEngine {
 	private static final class TemplateSymbols {
 		private final LinkedHashSet<String> macros = new LinkedHashSet<String>();
 		private final LinkedHashSet<String> declaredReferences = new LinkedHashSet<String>();
-//		private final LinkedHashSet<String> observedReferences = new LinkedHashSet<String>();
+		private final Map<String, String> declaredTypes = new LinkedHashMap<String, String>();
 
 		Set<String> macros() {
 			return macros;
@@ -604,9 +635,9 @@ final class VTLCompletionEngine {
 			return declaredReferences;
 		}
 
-//		Set<String> observedReferences() {
-//			return observedReferences;
-//		}
+		Map<String, String> declaredTypes() {
+			return declaredTypes;
+		}
 	}
 
 	private static final class SymbolCollector extends VelocityAnalyser {
@@ -642,12 +673,36 @@ final class VTLCompletionEngine {
 					symbols.declaredReferences.add(reference);
 				}
 			}
+			if (node.jjtGetNumChildren() > 1) {
+				SimpleNode collection = (SimpleNode) node.jjtGetChild(1);
+				String collectionType = inferType(collection);
+				if (collectionType != null) {
+					String elementType = elementTypeOf(collectionType);
+					if (elementType != null && node.jjtGetNumChildren() > 0) {
+						String loopVar = getReferenceName((SimpleNode) node.jjtGetChild(0));
+						if (loopVar != null) {
+							symbols.declaredTypes.put(loopVar, elementType);
+						}
+					}
+				}
+			}
 			return node.childrenAccept(this, data);
 		}
 
 		@Override
 		public Object visit(ASTSetDirective node, Object data) {
-			if (node.jjtGetNumChildren() > 0 && node.jjtGetChild(0) instanceof SimpleNode child) {
+			if (node.jjtGetNumChildren() >= 2
+					&& node.jjtGetChild(0) instanceof SimpleNode lhs
+					&& node.jjtGetChild(1) instanceof SimpleNode rhs) {
+				String varName = getReferenceName(lhs);
+				if (varName != null) {
+					symbols.declaredReferences.add(varName);
+					String inferredType = inferType(rhs);
+					if (inferredType != null) {
+						symbols.declaredTypes.put(varName, inferredType);
+					}
+				}
+			} else if (node.jjtGetNumChildren() > 0 && node.jjtGetChild(0) instanceof SimpleNode child) {
 				String reference = normalizeReference(child.getFirstToken() != null ? child.getFirstToken().image : null);
 				if (reference != null) {
 					symbols.declaredReferences.add(reference);
@@ -656,14 +711,93 @@ final class VTLCompletionEngine {
 			return node.childrenAccept(this, data);
 		}
 
-//		@Override
-//		public Object visit(ASTReference node, Object data) {
-//			String reference = normalizeReference(node.getFirstToken() != null ? node.getFirstToken().image : null);
-//			if (reference != null) {
-//				symbols.observedReferences.add(reference);
-//			}
-//			return node.childrenAccept(this, data);
-//		}
+		private String inferType(SimpleNode node) {
+			if (node instanceof ASTStringLiteral) {
+				return "java.lang.String";
+			} else if (node instanceof ASTIntegerLiteral) {
+				return "java.lang.Integer";
+			} else if (node instanceof ASTFloatingPointLiteral) {
+				return "java.lang.Double";
+			} else if (node instanceof ASTTrue || node instanceof ASTFalse) {
+				return "java.lang.Boolean";
+			} else if (node instanceof ASTMap) {
+				return "java.util.Map";
+			} else if (node instanceof ASTObjectArray) {
+				return "java.util.List";
+			} else if (node instanceof ASTIntegerRange) {
+				return "int[]";
+			} else if (node instanceof ASTReference) {
+				return inferReferenceType((ASTReference) node);
+			} else if (node instanceof ASTExpression) {
+				if (node.jjtGetNumChildren() > 0 && node.jjtGetChild(0) instanceof SimpleNode inner) {
+					return inferType(inner);
+				}
+			} else if (node instanceof ASTOrNode || node instanceof ASTAndNode || node instanceof ASTNotNode
+					|| node instanceof ASTEQNode || node instanceof ASTNENode
+					|| node instanceof ASTLTNode || node instanceof ASTGTNode
+					|| node instanceof ASTLENode || node instanceof ASTGENode) {
+				return "java.lang.Boolean";
+			} else if (node instanceof ASTAddNode) {
+				return inferAddType((ASTAddNode) node);
+			}
+			return null;
+		}
+
+		private String inferReferenceType(ASTReference ref) {
+			String refName = getReferenceName(ref);
+			if (refName != null) {
+				String knownType = symbols.declaredTypes.get(refName);
+				if (knownType != null) {
+					return knownType;
+				}
+			}
+			if (ref.jjtGetNumChildren() > 0 && ref.jjtGetChild(ref.jjtGetNumChildren() - 1) instanceof SimpleNode lastChild
+					&& lastChild instanceof ASTMethod) {
+				return "java.lang.Object";
+			}
+			return null;
+		}
+
+		private String inferAddType(ASTAddNode node) {
+			if (node.jjtGetNumChildren() >= 2) {
+				String leftType = node.jjtGetChild(0) instanceof SimpleNode lc ? inferType(lc) : null;
+				String rightType = node.jjtGetNumChildren() > 1 && node.jjtGetChild(1) instanceof SimpleNode rc ? inferType(rc) : null;
+				if ("java.lang.String".equals(leftType) || "java.lang.String".equals(rightType)) {
+					return "java.lang.String";
+				}
+				if ("java.lang.Double".equals(leftType) || "java.lang.Double".equals(rightType)) {
+					return "java.lang.Double";
+				}
+			}
+			return "java.lang.Integer";
+		}
+
+		private static String elementTypeOf(String collectionType) {
+			if (collectionType == null) return null;
+			if (collectionType.startsWith("java.util.List") || collectionType.startsWith("java.util.Collection")
+					|| collectionType.startsWith("java.util.Set") || collectionType.startsWith("java.util.ArrayList")) {
+				return "java.lang.Object";
+			}
+			if (collectionType.equals("int[]") || collectionType.equals("Integer[]")) {
+				return "java.lang.Integer";
+			}
+			if (collectionType.endsWith("[]")) {
+				return "java.lang.Object";
+			}
+			return null;
+		}
+
+		private static String getReferenceName(SimpleNode node) {
+			if (node instanceof ASTReference) {
+				String raw = node.getFirstToken() != null ? node.getFirstToken().image : null;
+				return normalizeReference(raw);
+			}
+			if (node instanceof ASTIdentifier) {
+				String raw = node.getFirstToken() != null ? node.getFirstToken().image : null;
+				return normalizeReference(raw);
+			}
+			return null;
+		}
 
 		@Override
 		public void openTransaction() {

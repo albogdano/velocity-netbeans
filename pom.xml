@@ -8,7 +8,7 @@
 
 	<packaging>nbm</packaging>
 	<name>Velocity Plugin for Netbeans</name>
-	<description>NetBeans plugin that plugin that provides editor support for Apache Velocity Template Language (VTL) in .vm and .vsl files.</description>
+	<description>NetBeans plugin that provides editor support for Apache Velocity Template Language (VTL) in .vm and .vsl files.</description>
 	<url>https://github.com/albogdano/velocity-netbeans</url>
 
 	<organization>

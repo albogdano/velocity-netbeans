@@ -9,7 +9,6 @@
  */
 package com.erudika.netbeans.velocity.parser;
 
-import com.erudika.netbeans.velocity.VelocityRefresher;
 import static com.erudika.netbeans.velocity.completion.MacroLibraryScanner.DEFAULT_LIBRARY;
 import com.erudika.netbeans.velocity.jcclexer.Directive;
 import com.erudika.netbeans.velocity.jcclexer.VelocityParser;
@@ -22,8 +21,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeListener;
-import javax.swing.text.Document;
 import org.netbeans.modules.parsing.api.Snapshot;
 import org.netbeans.modules.parsing.api.Task;
 import org.netbeans.modules.parsing.spi.ParseException;
@@ -34,7 +33,7 @@ import org.openide.filesystems.FileObject;
 /**
  * Implementation of parser for VTL language.
  *
- * @author <a href="mailto:werner.jaeger@t-systems.com">Werner Jaeger</a>
+ * @author <a href="mailto:werner.jaeger@t-systems.com">Werner Jäger</a>
  */
 public class VTLParser extends Parser {
 
@@ -69,25 +68,12 @@ public class VTLParser extends Parser {
 			m_Parser.addDirective("evaluate", new Directive(Directive.LINE));
 			m_Parser.addDirective("define", new Directive(Directive.BLOCK));
 
-			// Record library macro count before registration so we can detect
-			// newly discovered macros and trigger a re-lex if needed
-			int prevLibrarySize = VelocityParser.libraryMacroNamesSize();
-
-			// Register library macros so the lexer highlights them as directives
+			// Ensure library macros are registered for the lexer. They are
+			// pre-loaded in VTLDataObject, but this handles edge cases where
+			// the data object was created before the macro library was configured.
 			FileObject fileObject = snapshot.getSource().getFileObject();
 			if (fileObject != null) {
 				registerLibraryMacros(fileObject);
-			}
-
-			// If new library macros were discovered during this parse, the lexer
-			// may have tokenized them as WORD instead of MACROCALL_DIRECTIVE.
-			// Schedule a re-lex of the document so they get correct highlighting
-			// and hyperlink support.
-			if (VelocityParser.libraryMacroNamesSize() > prevLibrarySize) {
-				Document doc = snapshot.getSource().getDocument(false);
-				if (doc != null && VelocityRefresher.isVTLDocument(doc)) {
-					VelocityRefresher.scheduleRelex(doc);
-				}
 			}
 
 			final SimpleNode sn = m_Parser.parse(new StringReader(snapshot.getText().toString()),
@@ -100,9 +86,17 @@ public class VTLParser extends Parser {
 
 				if (analysers != null) {
 					for (final VelocityAnalyser analyser : analysers) {
-						analyser.openTransaction();
-						analyser.visit(sn, null);
-						analyser.commitTransaction();
+						if (SwingUtilities.isEventDispatchThread()) {
+							analyser.openTransaction();
+							analyser.visit(sn, null);
+							analyser.commitTransaction();
+						} else {
+							SwingUtilities.invokeLater(() -> {
+								analyser.openTransaction();
+								analyser.visit(sn, null);
+								analyser.commitTransaction();
+							});
+						}
 					}
 				}
 			}

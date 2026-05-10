@@ -36,28 +36,24 @@ import org.openide.windows.TopComponent;
 /**
  * Utility that clears stale caches and forces re-lex/re-parse of all open
  * VTL editor documents. Called when the macro library configuration changes
- * or when new library macros are discovered during parsing, so that macros
- * are highlighted and clickable immediately.
- * <p>
- * Re-lexing is triggered by a minimal document edit (insert+remove at
- * position 0) scheduled on the EDT after a delay, with retry logic to
- * handle fold hierarchy transaction conflicts.
+ * in the Options panel so that new macros are highlighted and clickable
+ * immediately.
  */
 public final class VelocityRefresher {
 
 	private static final Logger LOG = Logger.getLogger(VelocityRefresher.class.getName());
 	private static final String VTL_MIME = VTLParser.VTL_MIME_TYPE;
-	private static final int INITIAL_DELAY_MS = 300;
-	private static final int MAX_RETRIES = 3;
+	private static final int RELEX_DELAY_MS = 500;
+	private static final int MAX_RETRIES = 8;
 
 	private VelocityRefresher() {
 	}
 
 	/**
-	 * Clears macro-related caches and forces re-lex/re-parse of all open VTL
-	 * editors. This should be called after the macro library path is changed
-	 * in the Options panel so that the new library's macros are immediately
-	 * recognized for highlighting, hyperlinks, and validation.
+	 * Clears macro-related caches, re-registers library macros from the
+	 * configured library files, and forces re-lex/re-parse of all open VTL
+	 * editors. Call this after the macro library path is changed in the
+	 * Options panel.
 	 */
 	public static void refreshAllVTLEditors() {
 		VelocityParser.clearLibraryMacroNames();
@@ -79,11 +75,9 @@ public final class VelocityRefresher {
 	}
 
 	/**
-	 * Schedules a full re-lex for a specific document. Uses a minimal edit
-	 * (insert+remove at position 0) to invalidate the token cache and force
-	 * the lexer to re-tokenize. The edit is scheduled on the EDT with a delay
-	 * and retry logic to avoid conflicting with in-progress fold hierarchy
-	 * transactions.
+	 * Schedules a re-lex for a document by performing a minimal edit
+	 * (insert+remove at position 0) to invalidate the token cache. Uses
+	 * retry logic with increasing delays to handle fold hierarchy conflicts.
 	 *
 	 * @param doc the document to re-lex, must not be null
 	 */
@@ -94,7 +88,8 @@ public final class VelocityRefresher {
 	}
 
 	/**
-	 * Determines if the given document is a VTL document by MIME type.
+	 * Checks whether the given document is a VTL (Velocity Template Language)
+	 * document by examining its MIME type.
 	 */
 	public static boolean isVTLDocument(Document doc) {
 		Object streamDesc = doc.getProperty(Document.StreamDescriptionProperty);
@@ -121,8 +116,8 @@ public final class VelocityRefresher {
 			LOG.log(Level.FINE, "Failed to re-lex VTL document", ex);
 		} catch (IllegalStateException ex) {
 			if (attempt < MAX_RETRIES) {
-				LOG.log(Level.FINE, "Fold hierarchy busy, retrying re-lex (attempt {0})", attempt + 1);
-				int delay = INITIAL_DELAY_MS * (attempt + 1);
+				int delay = RELEX_DELAY_MS * (attempt + 1);
+				LOG.log(Level.FINE, "Fold hierarchy busy, retrying re-lex in {0}ms (attempt {1})", new Object[]{delay, attempt + 1});
 				Timer timer = new Timer(delay, e -> forceRelexWithRetry(sdoc, attempt + 1));
 				timer.setRepeats(false);
 				timer.start();

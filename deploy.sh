@@ -16,6 +16,6 @@ rm changelog.txt
 
 mvn versions:set -DnewVersion=$ver
 mvn -DskipTests=true package
-gh release upload $ver target/velocity-netbeans-$ver.jar
+gh release upload $ver target/velocity-netbeans-$ver.nbm
 mvn versions:revert
 

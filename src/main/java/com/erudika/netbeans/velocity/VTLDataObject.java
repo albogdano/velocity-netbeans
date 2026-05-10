@@ -9,6 +9,8 @@
  */
 package com.erudika.netbeans.velocity;
 
+import com.erudika.netbeans.velocity.completion.MacroLibraryScanner;
+import com.erudika.netbeans.velocity.jcclexer.VelocityParser;
 import java.io.IOException;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.MIMEResolver;
@@ -25,6 +27,13 @@ import org.openide.util.Lookup;
 
 /**
  * Provides support for handling of data objects with multiple files.
+ *
+ * <p>On construction, pre-registers any library macro names from the
+ * configured macro library so that the lexer can recognize them as
+ * {@code MACROCALL_DIRECTIVE} tokens from the very first tokenization
+ * pass. Without this, library macros would only be registered during
+ * parsing, which happens after lexing, causing macros to appear as
+ * plain {@code WORD} tokens until a re-lex is triggered.</p>
  *
  * @author <a href="mailto:werner.jaeger@t-systems.com">Werner Jäger</a>
  */
@@ -48,6 +57,25 @@ public class VTLDataObject extends MultiDataObject {
 
 		final CookieSet cookies = getCookieSet();
 		cookies.add((Node.Cookie) DataEditorSupport.create(this, getPrimaryEntry(), cookies));
+
+		preloadLibraryMacros(fo);
+	}
+
+	/**
+	 * Pre-registers library macro names from the configured macro library
+	 * for this file's project context. Called during construction so that
+	 * macros are available to the lexer before the first tokenization pass.
+	 */
+	private static void preloadLibraryMacros(FileObject fo) {
+		if (fo == null) return;
+
+		try {
+			for (MacroLibraryScanner.MacroInfo macro : MacroLibraryScanner.getMacros(fo)) {
+				VelocityParser.addLibraryMacroName(macro.name());
+			}
+		} catch (Throwable ex) {
+			// Don't let macro scanning failures break data object creation
+		}
 	}
 
 	/**

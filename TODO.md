@@ -5,6 +5,6 @@
 - [ ] P3: Macro argument validation (check macro calls against definitions for argument count mismatch)
 - [ ] P3: Better FontAndColors differentiation (most token categories map to `keyword`; reduce visual ambiguity)
 - [ ] P3: String interpolation highlighting (variables/properties/methods inside double-quoted strings)
-- [ ] P4: Fix static macro registry (`VelocityParser.m_MacroNames` persists across file parses; use `m_LibraryMacroNames` separation or per-parse scope)
+- [x] P4: Fix static macro registry thread safety (`ConcurrentSkipListSet` for `m_MacroNames` and `m_LibraryMacroNames`)
 - [ ] P4: Add JavaCC regeneration to build (add `javacc-maven-plugin` execution to regenerate parser from `.jjt`)
 - [ ] P4: Convert to NetBeans annotations (replace layer.xml registrations with `@ServiceProvider`, `@MIMEResolver.Registration`, etc.)

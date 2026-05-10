@@ -14,7 +14,7 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Set;
 import java.util.Stack;
-import java.util.TreeSet;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 /**
  * A velocity template language (VTL) paser.
@@ -23,13 +23,13 @@ public class VelocityParser/*@bgen(jjtree)*/implements VelocityParserTreeConstan
   protected JJTVelocityParserState jjtree = new JJTVelocityParserState();/**
     *  This set contains a list of all declared macro names.
     */
-   private final static Set<String> m_MacroNames = new TreeSet<String>();
+   private final static Set<String> m_MacroNames = new ConcurrentSkipListSet<String>();
 
    /**
     *  Persistent set of library macro names (never cleared between parses).
     *  Ensures library macros remain available to the lexer across re-parses.
     */
-   private final static Set<String> m_LibraryMacroNames = new TreeSet<String>();
+   private final static Set<String> m_LibraryMacroNames = new ConcurrentSkipListSet<String>();
 
     /**
      *  Name of current template we are parsing.  Passed to us in parse()

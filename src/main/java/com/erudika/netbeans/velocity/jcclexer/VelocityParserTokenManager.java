@@ -87,12 +87,11 @@ public class VelocityParserTokenManager implements VelocityParserConstants {
     }
 
     /**
-     *  pushes the current state onto the 'state stack',
-     *  and maintains the parens counts
-     *  public because we need it in PD & VM handling
+     * pushes the current state onto the 'state stack',
+     * and maintains the parens counts
+     * public because we need it in PD and VM handling.
      *
-     *  @return boolean : success.  It can fail if the state machine
-     *     gets messed up (do don't mess it up :)
+     * @return boolean success. It can fail if the state machine gets messed up (do don't mess it up :)
      */
     public boolean stateStackPop()
     {

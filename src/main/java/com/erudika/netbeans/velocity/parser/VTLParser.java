@@ -9,8 +9,8 @@
  */
 package com.erudika.netbeans.velocity.parser;
 
-import static com.erudika.netbeans.velocity.completion.MacroLibraryScanner.DEFAULT_LIBRARY;
 import com.erudika.netbeans.velocity.VelocityRefresher;
+import static com.erudika.netbeans.velocity.completion.MacroLibraryScanner.DEFAULT_LIBRARY;
 import com.erudika.netbeans.velocity.jcclexer.Directive;
 import com.erudika.netbeans.velocity.jcclexer.VelocityParser;
 import com.erudika.netbeans.velocity.jcclexer.node.SimpleNode;
@@ -129,8 +129,6 @@ public class VTLParser extends Parser {
 	 * @param fo the file object for which to register the given analyzer. Must not be {@code null}.
 	 * @param analyser a reference to an analyzer that's visit method shall be called. If the passed analyzer is already
 	 * registered this method returns silently. Must not be {@code null}.
-	 *
-	 * @throws ParseException
 	 */
 	public static void registerAnalyser(final FileObject fo, final VelocityAnalyser analyser) {
 		final Set<VelocityAnalyser> analysers = ANALYSERS.get(fo);
@@ -150,8 +148,6 @@ public class VTLParser extends Parser {
 	 * @param fo the file object for which to remove the given analyzer. Must not be {@code null}.
 	 * @param analyser a reference to an analyzer to be removed. If the passed analyzer id not registered this method
 	 * returns silently. Must not be {@code null}.
-	 *
-	 * @throws ParseException
 	 */
 	public static void deregisterAnalyser(final FileObject fo, final VelocityAnalyser analyser) {
 		final Set<VelocityAnalyser> analysers = ANALYSERS.get(fo);

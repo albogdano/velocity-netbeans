@@ -22,7 +22,11 @@
 
 ## What it is
 
-This is an <a href="https://netbeans.apache.org/">Apache NetBeans</a> plugin that provides editor support for <a href="https://velocity.apache.org/">Apache Velocity Template Language</a> (VTL) files (<code>.vm</code> and <code>.vsl</code> extensions).
+Velocity is a mature and robust templating language for the JVM. NetBeans used to have pretty good plugins which added some
+support for Velocity but through the years those projects were abandoned and NetBeans was left without a proper plugin.
+This project aims to fix that and provide an advanced plugin for <a href="https://netbeans.apache.org/">Apache NetBeans</a>
+that provides editor support for <a href="https://velocity.apache.org/">Apache Velocity Template Language</a> (VTL)
+files (`.vm` and `.vsl` extensions).
 
 [![Screenshot](img/screen1.png)](img/screen1.png)
 

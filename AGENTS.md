@@ -51,6 +51,8 @@ src/main/java/com/erudika/netbeans/velocity/
     ├── VTLParser.java                      # Parser wrapper
     ├── VTLParserFactory.java
     ├── VTLParserResult.java
+    ├── VTLMacroValidationTask.java            # Macro arg count validation visitor + task
+    ├── VTLMacroValidationTaskFactory.java     # Factory for macro validation task
     ├── VTLSyntaxErrorsHighlightingTask.java
     ├── VTLSyntaxErrorsHighlightingTaskFactory.java
     ├── VTLUpToDateStatusProvider.java
@@ -72,7 +74,8 @@ src/main/resources/com/erudika/netbeans/velocity/
 
 1. **Syntax coloring** — 67 token types across 10 categories (keyword, directive, comment, string, operator, number, identifier, boolean, separator, unparsedcontent)
 2. **Syntax error highlighting** — Parser collects errors, scheduler task highlights them in editor
-3. **Code folding** — Folds for `#foreach`, `#if`, `#elseif`, `#else`, `#macro` blocks
+3. **Macro argument validation** — Warns when macro calls have different argument counts than their `#macro` definition
+4. **Code folding** — Folds for `#foreach`, `#if`, `#elseif`, `#else`, `#macro` blocks
 4. **Braces matching** — Matches directive pairs (#if/#end, #foreach/#end, #macro/#end, #elseif/#end, #else/#end)
 5. **Error stripe** — Annotations show in the editor sidebar
 6. **MIME resolution** — `.vm` and `.vsl` files recognized as `text/x-velocity`
@@ -112,7 +115,7 @@ src/main/resources/com/erudika/netbeans/velocity/
 ### Issues & Limitations
 
 #### Existing Known Issues (from README.md)
-1. **No macro argument validation** — Macro calls are not checked against their definitions for argument count mismatch
+1. ~~**No macro argument validation**~~ — **FIXED**: `VTLMacroValidationTask` validates macro call arg counts against definitions
 2. **Missing directive coloring** — `#parse`, `#evaluate`, `#define` are recognized but not color-coded (they use generic directive token)
 3. **Escaped directive coloring** — Escaped variables/properties/methods should display as text color, not identifier color
 4. **String interpolation** — Variables/properties/methods inside double-quoted strings are not recognized or highlighted
@@ -315,7 +318,7 @@ VTL File (.vm/.vsl)
 | P1 | Macro name autocompletion | Medium | High user value | Pending |
 | P2 | ~~HTML mixing (embedded)~~ | ~~High~~ | ~~Critical for real-world use~~ | **DONE** |
 | P2 | ~~HTML autocompletion in mixed files~~ | ~~Medium~~ | ~~High user value~~ | **DONE** |
-| P3 | Macro argument validation | Medium | Improves code quality | Pending |
+| P3 | ~~Macro argument validation~~ | ~~Medium~~ | ~~Improves code quality~~ | **DONE** |
 | P3 | Better FontAndColors differentiation | Low | Improves readability | Pending |
 | P3 | String interpolation highlighting | Medium | Addresses known issue | Pending |
 | P4 | Fix static macro registry (cross-file pollution) | Low | Bug fix | Pending |
@@ -344,6 +347,6 @@ mvn nbm:cluster
 | ~~Autocompletion~~ | ~~NEW: `completion/*.java`, `layer.xml`, `pom.xml`~~ |
 | Macro completion | `completion/VTLCompletionQuery.java` — scan AST for `#macro` definitions |
 | ~~HTML Mixing~~ | ~~`VTLLanguageHierarchy.java`, `VTLLexer.java`, `VelocityParser.jjt`, `FontAndColors.xml`~~ |
-| Macro validation | `VTLParser.java`, `VelocityParser.jjt`, NEW: validation task |
+| Macro validation | `VTLMacroValidationTask.java`, `VTLMacroValidationTaskFactory.java`, `VTLParserResult.java` (AST access), `layer.xml`, `VTLMacroValidationTaskTest.java` |
 | Font/colors | `FontAndColors.xml`, `Bundle.properties` |
 | Tests | NEW: `src/test/` |

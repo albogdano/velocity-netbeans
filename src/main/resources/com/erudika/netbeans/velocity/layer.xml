@@ -45,8 +45,9 @@
 					<attr name="instanceOf" stringvalue="org.netbeans.api.lexer.Language"/>
 					<attr name="icon" stringvalue="com/erudika/netbeans/velocity/VelocityFiles16.png"/>
 				</file>
-				<file name="com.erudika.netbeans.velocity.parser.VTLParserFactory.instance"/>
-				<file name="com.erudika.netbeans.velocity.parser.VTLSyntaxErrorsHighlightingTaskFactory.instance"/>
+<file name="com.erudika.netbeans.velocity.parser.VTLParserFactory.instance"/>
+			<file name="com.erudika.netbeans.velocity.parser.VTLSyntaxErrorsHighlightingTaskFactory.instance"/>
+			<file name="com.erudika.netbeans.velocity.parser.VTLMacroValidationTaskFactory.instance"/>
 				<folder name="EmbeddingProviders">
 					<file name="com-erudika-netbeans-velocity-embedding-HTMLEmbeddingProvider.instance">
 						<attr name="instanceOf" stringvalue="org.netbeans.modules.parsing.spi.TaskFactory"/>

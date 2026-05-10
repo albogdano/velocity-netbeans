@@ -1,8 +1,10 @@
 # TODO
 
-- [ ] P3: Macro argument validation (check macro calls against definitions for argument count mismatch)
+- [ ] P1: When a Velocity macro library is configured in the Netbeans options menu, some macros are not highlighted properly and not clickable (i.e. don't have hyper links) - we need to rescan the current file again
 
 # DONE
+
+- [x] P3: Macro argument validation (check macro calls against definitions for argument count mismatch)
 - [x] P2: Brace matching for HTML tags in mixed VTL+HTML content (`VTLBracesMatcher` handles HTML tags cross-boundary; `VTLHtmlBracesMatcher` registered for `text/x-velocity/text/html` MimePath)
 - [x] P1: If we know where macros are located can we allow going to the macro definition when user executes Ctrl + Click on the macro name?
 - [x] P1: Ctrl+Click "Go To Definition" for VTL macros (`VTLMacroHyperlinkProvider` implementing `HyperlinkProviderExt`)

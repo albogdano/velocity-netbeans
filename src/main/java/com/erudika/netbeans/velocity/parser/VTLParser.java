@@ -46,6 +46,7 @@ public class VTLParser extends Parser {
 	private final VelocityParser m_Parser;
 
 	private Snapshot m_Snapshot;
+	private SimpleNode m_ASTRoot;
 
 	/**
 	 * Creates new {@code VTLParser}.
@@ -74,6 +75,8 @@ public class VTLParser extends Parser {
 
 			final SimpleNode sn = m_Parser.parse(new StringReader(snapshot.getText().toString()),
 					fileObject != null ? fileObject.getNameExt() : DEFAULT_LIBRARY);
+
+			m_ASTRoot = sn;
 
 			if (sn != null) {
 				final Set<VelocityAnalyser> analysers = ANALYSERS.get(sme.getModifiedSource().getFileObject());
@@ -146,7 +149,7 @@ public class VTLParser extends Parser {
 	 */
 	@Override
 	public Result getResult(final Task task) throws ParseException {
-		return (new VTLParserResult(m_Snapshot, m_Parser));
+		return (new VTLParserResult(m_Snapshot, m_Parser, m_ASTRoot));
 	}
 
 	/**

@@ -57,6 +57,7 @@ src/main/java/com/erudika/netbeans/velocity/
     ├── VTLSyntaxErrorsHighlightingTaskFactory.java
     ├── VTLUpToDateStatusProvider.java
     └── VTLUpToDateStatusProviderFactory.java
+├── VelocityRefresher.java                    # Cache clear + re-lex on config change
 
 src/main/resources/com/erudika/netbeans/velocity/
 ├── layer.xml                               # NetBeans layer (registry)
@@ -76,12 +77,12 @@ src/main/resources/com/erudika/netbeans/velocity/
 2. **Syntax error highlighting** — Parser collects errors, scheduler task highlights them in editor
 3. **Macro argument validation** — Warns when macro calls have different argument counts than their `#macro` definition
 4. **Code folding** — Folds for `#foreach`, `#if`, `#elseif`, `#else`, `#macro` blocks
-4. **Braces matching** — Matches directive pairs (#if/#end, #foreach/#end, #macro/#end, #elseif/#end, #else/#end)
-5. **Error stripe** — Annotations show in the editor sidebar
-6. **MIME resolution** — `.vm` and `.vsl` files recognized as `text/x-velocity`
-7. **File templates** — New VTL template available in File > New
-8. **HTML mixing** — HTML content between VTL directives receives syntax highlighting, code completion, and validation via embedded `text/html` language
-9. **Autocompletion** — Context-aware completions for directives (`#`), references (`$`), keywords, operators, and boolean literals
+5. **Braces matching** — Matches directive pairs (#if/#end, #foreach/#end, #macro/#end, #elseif/#end, #else/#end)
+6. **Error stripe** — Annotations show in the editor sidebar
+7. **MIME resolution** — `.vm` and `.vsl` files recognized as `text/x-velocity`
+8. **File templates** — New VTL template available in File > New
+9. **HTML mixing** — HTML content between VTL directives receives syntax highlighting, code completion, and validation via embedded `text/html` language
+10. **Autocompletion** — Context-aware completions for directives (`#`), references (`$`), keywords, operators, and boolean literals
 
 ---
 
@@ -125,7 +126,7 @@ src/main/resources/com/erudika/netbeans/velocity/
 6. **Raw types** — Several places use raw types instead of generics (e.g., `Map<VTLFoldInfo, Fold>` without proper generic imports in older code)
 7. **No unit tests** — There are no test files (`src/test/` directory does not exist). This is critical before adding new features
 8. **JavaCC grammar not regenerated** — The `.jjt` file exists but there is no Maven plugin or build step to regenerate the parser from it. The `.java` files in `jcclexer/` are pre-generated and checked in
-9. **Static macro registry** — `VelocityParser.m_MacroNames` is static, which means macro definitions persist across different file parses. This could cause false positives when macros defined in one file appear as "recognized" in another file
+9. **~~Static macro registry~~** — ~~`VelocityParser.m_MacroNames` is static, which means macro definitions persist across different file parses. This could cause false positives when macros defined in one file appear as "recognized" in another file~~ **FIXED**: `m_MacroNames` is cleared at the start of each `parse()` call; `m_LibraryMacroNames` is cleared via `VelocityParser.clearLibraryMacroNames()` when config changes; `MacroLibraryScanner.clearCache()` clears parsed library cache; `VelocityRefresher.refreshAllVTLEditors()` triggers re-lex of open editors
 10. **Hardcoded font/coloring** — Most token categories map to `keyword` in FontAndColors.xml, reducing visual differentiation
 11. **No NetBeans API annotations** — Missing `@ServiceProvider`, `@MIMEResolver`, and other declarative annotations that modern NetBeans modules use
 12. **`#end` folding description** — The fold description concatenates the first 3 tokens (`firstToken.next.next`) which could produce unreadable descriptions for complex directives
@@ -321,7 +322,7 @@ VTL File (.vm/.vsl)
 | P3 | ~~Macro argument validation~~ | ~~Medium~~ | ~~Improves code quality~~ | **DONE** |
 | P3 | Better FontAndColors differentiation | Low | Improves readability | Pending |
 | P3 | String interpolation highlighting | Medium | Addresses known issue | Pending |
-| P4 | Fix static macro registry (cross-file pollution) | Low | Bug fix | Pending |
+| P4 | ~~Fix static macro registry (cross-file pollution)~~ | ~~Low~~ | ~~Bug fix~~ | **DONE** |
 | P4 | Add JavaCC regeneration to build | Low | Improves maintainability | Pending |
 | P4 | Convert to NetBeans annotations | Low | Modernization | Pending |
 
@@ -348,5 +349,6 @@ mvn nbm:cluster
 | Macro completion | `completion/VTLCompletionQuery.java` — scan AST for `#macro` definitions |
 | ~~HTML Mixing~~ | ~~`VTLLanguageHierarchy.java`, `VTLLexer.java`, `VelocityParser.jjt`, `FontAndColors.xml`~~ |
 | Macro validation | `VTLMacroValidationTask.java`, `VTLMacroValidationTaskFactory.java`, `VTLParserResult.java` (AST access), `layer.xml`, `VTLMacroValidationTaskTest.java` |
+| Config refresh | `VelocityRefresher.java`, `VTLContextOptionsPanelController.java`, `VTLParser.java` (startup re-lex), `VelocityParser.java` (clearLibraryMacroNames, libraryMacroNamesSize), `MacroLibraryScanner.java` (clearCache) |
 | Font/colors | `FontAndColors.xml`, `Bundle.properties` |
 | Tests | NEW: `src/test/` |

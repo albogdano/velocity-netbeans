@@ -4,6 +4,8 @@
 
 # DONE
 
+- [x] P1: folding uses deprecated APIs
+- [x] P1: WARNING: Ineffective registration of resolver Services/MIMEResolver/VTLResolver.xml use @MIMEResolver.Registration! See bug #191777.
 - [x] P3: Macro argument validation (check macro calls against definitions for argument count mismatch)
 - [x] P2: Brace matching for HTML tags in mixed VTL+HTML content (`VTLBracesMatcher` handles HTML tags cross-boundary; `VTLHtmlBracesMatcher` registered for `text/x-velocity/text/html` MimePath)
 - [x] P1: If we know where macros are located can we allow going to the macro definition when user executes Ctrl + Click on the macro name?

@@ -72,6 +72,14 @@ public final class MacroLibraryScanner {
 		return allMacros;
 	}
 
+	/**
+	 * Clears the cached macro library results. Should be called when the macro
+	 * library configuration changes, so that libraries are re-parsed from disk.
+	 */
+	public static void clearCache() {
+		cache.clear();
+	}
+
 	private static List<String> resolveLibraryNames() {
 		String configured = VTLCompletionSettings.getConfiguredMacroLibrary();
 		if (configured != null && !configured.isBlank()) {

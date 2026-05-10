@@ -9,18 +9,20 @@
 - Configurable library file and global variables inside Netbeans Options > Editor > Velocity Context
 - New autocomplete icons
 - Various fixes and improvements:
-		-  Macro argument validation (check macro calls against definitions for argument count mismatch)
-		-  Brace matching for HTML tags in mixed VTL+HTML content (`VTLBracesMatcher` handles HTML tags cross-boundary; `VTLHtmlBracesMatcher` registered for `text/x-velocity/text/html` MimePath)
-		-  If we know where macros are located can we allow going to the macro definition when user executes Ctrl + Click on the macro name?
-		-  Ctrl+Click "Go To Definition" for VTL macros (`VTLMacroHyperlinkProvider` implementing `HyperlinkProviderExt`)
-		-  Local variable type inference from VTL literals and expressions (106 tests)
-		-  Macro argument autocompletion with correct arguments and tab-stop navigation
-		-  Add unit tests (95 tests covering completion engine, parser, braces matcher, completion item, dot expression parser, HTML embedding, type resolver)
-		-  Macro name autocompletion (scan AST for `#macro` definitions, suggest them in completion)
-		-  Better FontAndColors differentiation (distinct colors for directive, macro, boolean, separator, operator, number)
-		-  String interpolation highlighting (variables/properties/methods inside double-quoted strings)
-		-  Fix static macro registry thread safety (`ConcurrentSkipListSet` for `m_MacroNames` and `m_LibraryMacroNames`)
-		-  fixed folding uses deprecated APIs
+
+	- Macro argument validation (check macro calls against definitions for argument count mismatch)
+	- Brace matching for HTML tags in mixed VTL+HTML content (`VTLBracesMatcher` handles HTML tags cross-boundary; `VTLHtmlBracesMatcher` registered for `text/x-velocity/text/html` MimePath)
+	- If we know where macros are located can we allow going to the macro definition when user executes Ctrl + Click on the macro name?
+	- Ctrl+Click "Go To Definition" for VTL macros (`VTLMacroHyperlinkProvider` implementing `HyperlinkProviderExt`)
+	- Local variable type inference from VTL literals and expressions (106 tests)
+	- Macro argument autocompletion with correct arguments and tab-stop navigation
+	- Add unit tests (95 tests covering completion engine, parser, braces matcher, completion item, dot expression parser, HTML embedding, type resolver)
+	- Macro name autocompletion (scan AST for `#macro` definitions, suggest them in completion)
+	- Better FontAndColors differentiation (distinct colors for directive, macro, boolean, separator, operator, number)
+	- String interpolation highlighting (variables/properties/methods inside double-quoted strings)
+	- Fix static macro registry thread safety (`ConcurrentSkipListSet` for `m_MacroNames` and `m_LibraryMacroNames`)
+	- fixed folding uses deprecated APIs
+	- When a Velocity macro library is configured in the Netbeans options menu, some macros are not highlighted properly and not clickable (i.e. don't have hyper links) - we need to rescan the current file again
 
 **For version 2.2.5**
 

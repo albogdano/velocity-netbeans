@@ -181,6 +181,25 @@ public class VelocityParser/*@bgen(jjtree)*/implements VelocityParserTreeConstan
    }
 
    /**
+    *  Clears all library macro names. Should be called when the macro library
+    *  configuration changes, so that stale macros are removed before re-registering
+    *  the current set from the new library path.
+    */
+   public static void clearLibraryMacroNames()
+   {
+      m_LibraryMacroNames.clear();
+   }
+
+   /**
+    *  Returns the number of currently registered library macro names.
+    *  Used to detect when new library macros are discovered during parsing.
+    */
+   public static int libraryMacroNamesSize()
+   {
+      return m_LibraryMacroNames.size();
+   }
+
+   /**
     *  This method finds out if the macro is declared
     */
    public static boolean isMacro(final String strMacroName)

@@ -21,6 +21,7 @@ import javax.swing.JComponent;
 import org.netbeans.spi.options.OptionsPanelController;
 import org.openide.util.HelpCtx;
 import org.openide.util.Lookup;
+import com.erudika.netbeans.velocity.VelocityRefresher;
 
 //@OptionsPanelController.SubRegistration(
 //		id="velocity",
@@ -53,6 +54,7 @@ public final class VTLContextOptionsPanelController extends OptionsPanelControll
 	public void applyChanges() {
 		getPanel().store();
 		changed = false;
+		VelocityRefresher.refreshAllVTLEditors();
 	}
 
 	@Override

@@ -1,9 +1,9 @@
 # TODO
 
-- [ ] P1: When a Velocity macro library is configured in the Netbeans options menu, some macros are not highlighted properly and not clickable (i.e. don't have hyper links) - we need to rescan the current file again
 
 # DONE
 
+- [x] P1: When a Velocity macro library is configured in the Netbeans options menu, some macros are not highlighted properly and not clickable (i.e. don't have hyper links) - we need to rescan the current file again
 - [x] P1: folding uses deprecated APIs
 - [x] P1: WARNING: Ineffective registration of resolver Services/MIMEResolver/VTLResolver.xml use @MIMEResolver.Registration! See bug #191777.
 - [x] P3: Macro argument validation (check macro calls against definitions for argument count mismatch)

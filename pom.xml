@@ -4,7 +4,7 @@
 
 	<groupId>com.erudika</groupId>
 	<artifactId>velocity-netbeans</artifactId>
-	<version>3.0.0-SNAPSHOT</version>
+	<version>3.0.0</version>
 
 	<packaging>nbm</packaging>
 	<name>Velocity Plugin for Netbeans</name>
@@ -47,7 +47,7 @@
 		<connection>scm:git:https://github.com/albogdano/velocity-netbeans.git</connection>
 		<developerConnection>scm:git:https://github.com/albogdano/velocity-netbeans.git</developerConnection>
 		<url>https://github.com/albogdano/velocity-netbeans</url>
-		<tag>HEAD</tag>
+		<tag>3.0.0</tag>
 	</scm>
 
 	<issueManagement>

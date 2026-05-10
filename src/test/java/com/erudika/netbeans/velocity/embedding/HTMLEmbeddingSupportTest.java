@@ -32,4 +32,18 @@ class HTMLEmbeddingSupportTest
       assertTrue(HTMLEmbeddingSupport.mayContainHtmlMarkup(" id=\"id\">"));
       assertFalse(HTMLEmbeddingSupport.mayContainHtmlMarkup("$prefix$!value.substring($value.length() - 6)"));
    }
+
+   @Test
+   void detectsTagContinuationsAfterVtlHashSplit()
+   {
+      // When VTL lexer splits TEXT at '#' inside href="#anchor",
+      // the second TEXT token starts with '#anchor">' — must be detected as HTML
+      assertTrue(HTMLEmbeddingSupport.mayContainHtmlMarkup("#spaces-tab\">"));
+      assertTrue(HTMLEmbeddingSupport.mayContainHtmlMarkup("#section\">some text</a>"));
+      assertTrue(HTMLEmbeddingSupport.mayContainHtmlMarkup("value\">"));
+      assertTrue(HTMLEmbeddingSupport.mayContainHtmlMarkup(">text</div>"));
+      // Pure VTL content without HTML should not be detected
+      assertFalse(HTMLEmbeddingSupport.mayContainHtmlMarkup("#set($x = 1)"));
+      assertFalse(HTMLEmbeddingSupport.mayContainHtmlMarkup("plain text"));
+   }
 }

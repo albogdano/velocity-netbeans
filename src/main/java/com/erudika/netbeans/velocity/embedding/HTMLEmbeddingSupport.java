@@ -57,6 +57,8 @@ public final class HTMLEmbeddingSupport
          }
          else if (ch == '&')
             return(true);
+         else if (ch == '>')
+            return(true);
       }
 
       return(false);

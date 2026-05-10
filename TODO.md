@@ -1,9 +1,9 @@
 # TODO
 
-- [ ] P2: Brace matching for HTML tags doesn't work
 - [ ] P3: Macro argument validation (check macro calls against definitions for argument count mismatch)
 
 # DONE
+- [x] P2: Brace matching for HTML tags in mixed VTL+HTML content (`VTLBracesMatcher` handles HTML tags cross-boundary; `VTLHtmlBracesMatcher` registered for `text/x-velocity/text/html` MimePath)
 - [x] P1: If we know where macros are located can we allow going to the macro definition when user executes Ctrl + Click on the macro name?
 - [x] P1: Ctrl+Click "Go To Definition" for VTL macros (`VTLMacroHyperlinkProvider` implementing `HyperlinkProviderExt`)
 - [x] P0: Local variable type inference from VTL literals and expressions (106 tests)

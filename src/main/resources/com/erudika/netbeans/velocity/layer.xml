@@ -86,6 +86,9 @@
 				<folder name="text">
 					<folder name="html">
 						<folder name="BracesMatchers">
+							<file name="com-erudika-netbeans-velocity-editor-bracesmatching-VTLHtmlBracesMatcher.instance">
+								<attr name="position" intvalue="10"/>
+							</file>
 							<file name="org-netbeans-modules-html-editor-HtmlBracesMatching.instance_hidden"/>
 						</folder>
 						<folder name="CompletionProviders">

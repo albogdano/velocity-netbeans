@@ -146,6 +146,61 @@ class VTLCompletionEngineTest {
 	}
 
 	@Test
+	void completesMacroWithArgumentsInInsertText() {
+		String template = "#macro(test $arg1 $arg2)\n#end\n#te";
+		List<VTLCompletionProposal> proposals = VTLCompletionEngine.complete(template, template.length(), null, true);
+		VTLCompletionProposal macroProposal = proposals.stream()
+				.filter(p -> "#test".equals(p.getName()))
+				.findFirst()
+				.orElse(null);
+		assertNotNull(macroProposal);
+		assertTrue(macroProposal.getInsertText().contains("${1 default=\"$arg1\"}"),
+				() -> "Expected first arg placeholder in: " + macroProposal.getInsertText());
+		assertTrue(macroProposal.getInsertText().contains("${2 default=\"$arg2\"}"),
+				() -> "Expected second arg placeholder in: " + macroProposal.getInsertText());
+	}
+
+	@Test
+	void completesMacroWithArgumentsInDescription() {
+		String template = "#macro(myMacro $name $value)\n#end\n#my";
+		List<VTLCompletionProposal> proposals = VTLCompletionEngine.complete(template, template.length(), null, true);
+		VTLCompletionProposal macroProposal = proposals.stream()
+				.filter(p -> "#myMacro".equals(p.getName()))
+				.findFirst()
+				.orElse(null);
+		assertNotNull(macroProposal);
+		assertTrue(macroProposal.getDescription().contains("myMacro($name, $value)"),
+				() -> "Expected signature in description, got: " + macroProposal.getDescription());
+	}
+
+	@Test
+	void completesMacroWithSingleArgument() {
+		String template = "#macro(greet $who)\n#end\n#gr";
+		List<VTLCompletionProposal> proposals = VTLCompletionEngine.complete(template, template.length(), null, true);
+		VTLCompletionProposal macroProposal = proposals.stream()
+				.filter(p -> "#greet".equals(p.getName()))
+				.findFirst()
+				.orElse(null);
+		assertNotNull(macroProposal);
+		assertTrue(macroProposal.getInsertText().contains("${1 default=\"$who\"}"),
+				() -> "Expected arg placeholder in: " + macroProposal.getInsertText());
+		assertTrue(macroProposal.getDescription().contains("greet($who)"),
+				() -> "Expected signature in description, got: " + macroProposal.getDescription());
+	}
+
+	@Test
+	void completesMacroWithNoArgumentsStillWorks() {
+		String template = "#macro(noArgs)\n#end\n#no";
+		List<VTLCompletionProposal> proposals = VTLCompletionEngine.complete(template, template.length(), null, true);
+		VTLCompletionProposal macroProposal = proposals.stream()
+				.filter(p -> "#noArgs".equals(p.getName()))
+				.findFirst()
+				.orElse(null);
+		assertNotNull(macroProposal);
+		assertTrue(macroProposal.getInsertText().contains("#noArgs()"),
+				() -> "Expected #noArgs() in: " + macroProposal.getInsertText());
+		assertEquals("Velocimacro", macroProposal.getDescription());
+	}
 	void completesLocalMacrosAfterHash() {
 		String template = "#macro(greet $name)\n#end\n#";
 		List<VTLCompletionProposal> proposals = VTLCompletionEngine.complete(template, template.length(), null, true);

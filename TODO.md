@@ -1,11 +1,12 @@
 # TODO
 
-- [ ] P1: Macro argument validation (check macro calls against definitions for argument count mismatch) and autocomplete with the correct arguments
+- [ ] P1: Macro argument validation (check macro calls against definitions for argument count mismatch)
 - [ ] P1: If we know where macros are located can we allow going to the macro definition when user executes Ctrl + Click on the macro name?
 - [ ] P2: Brace matching for HTML tags doesn't work
 
 # DONE & WON'T FIX
-- [x] P0: Local variable type inference from VTL literals and expressions (103 tests)
+- [x] P0: Local variable type inference from VTL literals and expressions (106 tests)
+- [x] P1: Macro argument autocompletion with correct arguments and tab-stop navigation
 - [x] P0: Add unit tests (95 tests covering completion engine, parser, braces matcher, completion item, dot expression parser, HTML embedding, type resolver)
 - [x] P1: Macro name autocompletion (scan AST for `#macro` definitions, suggest them in completion)
 - [x] P3: Better FontAndColors differentiation (distinct colors for directive, macro, boolean, separator, operator, number)

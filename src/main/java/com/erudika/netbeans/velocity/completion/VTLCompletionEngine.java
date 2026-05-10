@@ -58,6 +58,7 @@ import java.io.ByteArrayInputStream;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.LinkedHashMap;
@@ -175,8 +176,24 @@ final class VTLCompletionEngine {
 		for (String macroName : symbols.macros()) {
 			String proposalName = "#" + macroName;
 			if (matches(proposalName, filter)) {
+				List<String> params = symbols.macroParams().get(macroName);
+				String insertText;
+				String description;
+				if (params != null && !params.isEmpty()) {
+					StringBuilder sb = new StringBuilder(proposalName).append("(");
+					for (int i = 0; i < params.size(); i++) {
+						if (i > 0) sb.append(" ");
+						sb.append("${").append(i + 1).append(" default=\"").append(params.get(i)).append("\"}");
+					}
+					sb.append(")${cursor}");
+					insertText = sb.toString();
+					description = "Velocimacro: " + macroName + "(" + String.join(", ", params) + ")";
+				} else {
+					insertText = proposalName + "()${cursor}";
+					description = "Velocimacro";
+				}
 				put(proposals, proposalName,
-						new VTLCompletionProposal(proposalName, proposalName + "()", "Velocimacro",
+						new VTLCompletionProposal(proposalName, insertText, description,
 								VTLCompletionItem.ItemType.DIRECTIVE, 35, context.replaceOffset(), context.replaceLength()));
 			}
 		}
@@ -382,6 +399,9 @@ final class VTLCompletionEngine {
 		if (fileObject != null) {
 			for (MacroLibraryScanner.MacroInfo macro : MacroLibraryScanner.getMacros(fileObject)) {
 				symbols.macros.add(macro.name());
+				if (!macro.params().isEmpty()) {
+					symbols.macroParams.put(macro.name(), macro.params());
+				}
 			}
 		}
 
@@ -393,6 +413,8 @@ final class VTLCompletionEngine {
 			VelocityParserTokenManager tokenManager = new VelocityParserTokenManager(
 					new SimpleCharStream(new ByteArrayInputStream(text.getBytes(StandardCharsets.UTF_8)), 1, 1));
 			boolean expectMacroName = false;
+			boolean collectingMacroParams = false;
+			List<String> currentMacroParams = null;
 			boolean expectForeachVar = false;
 			boolean expectSetTarget = false;
 			Token token;
@@ -401,6 +423,8 @@ final class VTLCompletionEngine {
 				switch (token.kind) {
 					case VelocityParserConstants.MACRO_DIRECTIVE:
 						expectMacroName = true;
+						collectingMacroParams = false;
+						currentMacroParams = null;
 						expectForeachVar = false;
 						expectSetTarget = false;
 						break;
@@ -417,13 +441,17 @@ final class VTLCompletionEngine {
 					case VelocityParserConstants.WORD:
 						if (expectMacroName && token.image != null && !token.image.isBlank()) {
 							symbols.macros.add(token.image.trim());
+							currentMacroParams = new ArrayList<String>();
+							collectingMacroParams = true;
 							expectMacroName = false;
 						}
 						break;
 					case VelocityParserConstants.IDENTIFIER:
 						String reference = normalizeReference(token.image);
-						if (reference != null) {
-							//symbols.observedReferences.add(reference);
+						if (collectingMacroParams && reference != null) {
+							currentMacroParams.add(reference);
+							symbols.declaredReferences.add(reference);
+						} else if (reference != null) {
 							if (expectForeachVar || expectSetTarget) {
 								symbols.declaredReferences.add(reference);
 							}
@@ -432,7 +460,22 @@ final class VTLCompletionEngine {
 						expectSetTarget = false;
 						break;
 					case VelocityParserConstants.RPAREN:
+						if (collectingMacroParams && currentMacroParams != null && !currentMacroParams.isEmpty()) {
+							String macroName = findLastMacroName(symbols);
+							if (macroName != null) {
+								symbols.macroParams.put(macroName, currentMacroParams);
+							}
+						}
+						collectingMacroParams = false;
+						currentMacroParams = null;
+						expectMacroName = false;
+						expectForeachVar = false;
+						expectSetTarget = false;
+						break;
 					case VelocityParserConstants.REFMOD2_RPAREN:
+						expectForeachVar = false;
+						expectSetTarget = false;
+						break;
 					case VelocityParserConstants.NEWLINE:
 						expectMacroName = false;
 						expectForeachVar = false;
@@ -445,6 +488,13 @@ final class VTLCompletionEngine {
 		} catch (TokenMgrError ex) {
 			// Ignore incomplete tokens while collecting lexical symbols.
 		}
+	}
+
+	private static String findLastMacroName(TemplateSymbols symbols) {
+		for (String name : symbols.macros()) {
+			return name;
+		}
+		return null;
 	}
 
 	private static boolean matches(String candidate, String rawFilter) {
@@ -624,11 +674,16 @@ final class VTLCompletionEngine {
 
 	private static final class TemplateSymbols {
 		private final LinkedHashSet<String> macros = new LinkedHashSet<String>();
+		private final Map<String, List<String>> macroParams = new LinkedHashMap<String, List<String>>();
 		private final LinkedHashSet<String> declaredReferences = new LinkedHashSet<String>();
 		private final Map<String, String> declaredTypes = new LinkedHashMap<String, String>();
 
 		Set<String> macros() {
 			return macros;
+		}
+
+		Map<String, List<String>> macroParams() {
+			return macroParams;
 		}
 
 		Set<String> declaredReferences() {
@@ -651,17 +706,23 @@ final class VTLCompletionEngine {
 		public Object visit(ASTMacroStatement node, Object data) {
 			Token macroName = nthToken(node.getFirstToken(), 2);
 			if (macroName != null && macroName.image != null && !macroName.image.isBlank()) {
-				symbols.macros.add(macroName.image.trim());
-			}
-
-			for (int i = 0; i < node.jjtGetNumChildren(); i++) {
-				if (node.jjtGetChild(i) instanceof ASTIdentifier child) {
-					String reference = normalizeReference(child.getFirstToken() != null ? child.getFirstToken().image : null);
-					if (reference != null) {
-						symbols.declaredReferences.add(reference);
+				String name = macroName.image.trim();
+				symbols.macros.add(name);
+				List<String> params = new ArrayList<String>();
+				for (int i = 0; i < node.jjtGetNumChildren(); i++) {
+					if (node.jjtGetChild(i) instanceof ASTIdentifier child) {
+						String reference = normalizeReference(child.getFirstToken() != null ? child.getFirstToken().image : null);
+						if (reference != null) {
+							symbols.declaredReferences.add(reference);
+							params.add(reference);
+						}
 					}
 				}
+				if (!params.isEmpty()) {
+					symbols.macroParams.put(name, params);
+				}
 			}
+
 			return node.childrenAccept(this, data);
 		}
 

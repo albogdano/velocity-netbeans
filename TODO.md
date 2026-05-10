@@ -1,0 +1,10 @@
+# TODO
+
+- [ ] P0: Add unit tests (no `src/test/` coverage for lexer, parser, completion, folding)
+- [ ] P1: Macro name autocompletion (scan AST for `#macro` definitions, suggest them in completion)
+- [ ] P3: Macro argument validation (check macro calls against definitions for argument count mismatch)
+- [ ] P3: Better FontAndColors differentiation (most token categories map to `keyword`; reduce visual ambiguity)
+- [ ] P3: String interpolation highlighting (variables/properties/methods inside double-quoted strings)
+- [ ] P4: Fix static macro registry (`VelocityParser.m_MacroNames` persists across file parses; use `m_LibraryMacroNames` separation or per-parse scope)
+- [ ] P4: Add JavaCC regeneration to build (add `javacc-maven-plugin` execution to regenerate parser from `.jjt`)
+- [ ] P4: Convert to NetBeans annotations (replace layer.xml registrations with `@ServiceProvider`, `@MIMEResolver.Registration`, etc.)

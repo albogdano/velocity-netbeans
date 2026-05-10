@@ -52,20 +52,20 @@ final class VTLCompletionEngine {
 
 	private static final List<DirectiveTemplate> DIRECTIVES = List.of(
 			new DirectiveTemplate("#set", "#set(${VAR default=\"$var\"} = ${VALUE default=\"value\"})${cursor}", "Variable assignment"),
-			new DirectiveTemplate("#macro", "#macro(${NAME default=\"name\"} $arg)\n\n#end${cursor}", "Macro definition"),
-			new DirectiveTemplate("#if", "#if(${COND default=\"$condition\"})\n\n#end${cursor}", "Conditional directive"),
+			new DirectiveTemplate("#macro", "#macro(${NAME default=\"name\"} ${ARG default=\"$arg\"})\n${cursor}\n#end", "Macro definition"),
+			new DirectiveTemplate("#if", "#if(${COND default=\"$condition\"})\n${cursor}\n#end", "Conditional directive"),
 			new DirectiveTemplate("#ifi", "#if(${COND default=\"$condition\"})${cursor}#end", "Inline conditional"),
-			new DirectiveTemplate("#else", "#else", "Else branch"),
+			new DirectiveTemplate("#else", "#else${cursor}", "Else branch"),
 			new DirectiveTemplate("#elseif", "#elseif(${COND default=\"$condition\"})${cursor}", "Else-if branch"),
-			new DirectiveTemplate("#end", "#end", "End block"),
-			new DirectiveTemplate("#foreach", "#foreach(${ITEM default=\"$item\"} in $list)\n\n#end${cursor}", "Loop directive"),
+			new DirectiveTemplate("#end", "#end${cursor}", "End block"),
+			new DirectiveTemplate("#foreach", "#foreach(${ITEM default=\"$item\"} in ${LIST default=\"$list\"})\n${cursor}\n#end", "Loop directive"),
 			new DirectiveTemplate("#include", "#include(\"${PATH default=\"path\"}\")${cursor}", "Include template"),
 			new DirectiveTemplate("#parse", "#parse(\"${PATH default=\"path\"}\")${cursor}", "Parse template"),
 			new DirectiveTemplate("#evaluate", "#evaluate(${EXPR default=\"$expr\"})${cursor}", "Evaluate expression"),
-			new DirectiveTemplate("#define", "#define(${NAME default=\"$block\"})\n\n#end${cursor}", "Define block"),
-			new DirectiveTemplate("#break", "#break", "Break directive"),
-			new DirectiveTemplate("#stop", "#stop", "Stop rendering"),
-			new DirectiveTemplate("#comment #* .. *#", "#* ${TEXT default=\"comment\"} *# ${cursor}", "Comment block")
+			new DirectiveTemplate("#define", "#define(${NAME default=\"$block\"})\n${cursor}\n#end", "Define block"),
+			new DirectiveTemplate("#break", "#break${cursor}", "Break directive"),
+			new DirectiveTemplate("#stop", "#stop${cursor}", "Stop rendering"),
+			new DirectiveTemplate("#comment #* .. *#", "#*\n${TEXT default=\"comment\"}\n*#${cursor}", "Comment block")
 	);
 
 	private static final List<String> KEYWORDS = List.of("in", "and", "or", "not", "eq", "ne", "lt", "le", "gt", "ge");

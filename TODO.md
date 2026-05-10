@@ -1,6 +1,6 @@
 # TODO
 
-- [ ] P0: Add unit tests (no `src/test/` coverage for lexer, parser, completion, folding)
+- [x] P0: Add unit tests (95 tests covering completion engine, parser, braces matcher, completion item, dot expression parser, HTML embedding, type resolver)
 - [ ] P1: Macro name autocompletion (scan AST for `#macro` definitions, suggest them in completion)
 - [ ] P3: Macro argument validation (check macro calls against definitions for argument count mismatch)
 - [ ] P3: Better FontAndColors differentiation (most token categories map to `keyword`; reduce visual ambiguity)

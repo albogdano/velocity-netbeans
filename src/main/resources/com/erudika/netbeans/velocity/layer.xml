@@ -7,11 +7,6 @@
 		<folder name="text">
 			<folder name="x-velocity">
 				<attr name="SystemFileSystem.localizingBundle" stringvalue="com.erudika.netbeans.velocity.Bundle"/>
-				<!--            <folder name="Preferences">
-						<folder name="Defaults">
-								<file name="com-erudika-netbeans-velocity-preferences.xml" url="DefaultPreferences.xml" />
-						</folder>
-				</folder>-->
 				<folder name="FontsColors">
 					<folder name="NetBeans">
 						<folder name="Defaults">
@@ -40,9 +35,10 @@
 					<attr name="instanceOf" stringvalue="org.netbeans.api.lexer.Language"/>
 					<attr name="icon" stringvalue="com/erudika/netbeans/velocity/VelocityFiles16.png"/>
 				</file>
-<file name="com.erudika.netbeans.velocity.parser.VTLParserFactory.instance"/>
-			<file name="com.erudika.netbeans.velocity.parser.VTLSyntaxErrorsHighlightingTaskFactory.instance"/>
-			<file name="com.erudika.netbeans.velocity.parser.VTLMacroValidationTaskFactory.instance"/>
+				<file name="com-erudika-netbeans-velocity-editor-indent-VTLIndentTaskFactory.instance"/>
+				<file name="com.erudika.netbeans.velocity.parser.VTLParserFactory.instance"/>
+				<file name="com.erudika.netbeans.velocity.parser.VTLSyntaxErrorsHighlightingTaskFactory.instance"/>
+				<file name="com.erudika.netbeans.velocity.parser.VTLMacroValidationTaskFactory.instance"/>
 				<folder name="EmbeddingProviders">
 					<file name="com-erudika-netbeans-velocity-embedding-HTMLEmbeddingProvider.instance">
 						<attr name="instanceOf" stringvalue="org.netbeans.modules.parsing.spi.TaskFactory"/>

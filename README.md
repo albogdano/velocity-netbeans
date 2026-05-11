@@ -8,7 +8,8 @@
   <br>Velocity Plugin for Apache NetBeans</br>
 </h1>
 
-> This project is a fork of the original [Velocity Editor](https://sourceforge.net/projects/velocity-editor/) plugin by Werner Jäger (T-Systems International GmbH), updated and extended with modern features for current NetBeans releases.
+> This project is a fork of the original [Velocity Editor](https://sourceforge.net/projects/velocity-editor/) plugin
+> by Werner Jäger (T-Systems International GmbH), updated and extended with modern features for current NetBeans releases.
 
 <p align="center">
   <a href="#features">Features</a> •
@@ -96,8 +97,10 @@ Open any `.vm` or `.vsl` file. You get syntax highlighting, error detection, cod
 
 For method/property suggestions to work, the plugin needs to know the Java type of each variable. This is resolved from:
 
-1. **Automatic Java scanning** — The plugin scans your project's Java files for `context.put("key", value)` and `model.addAttribute("key", value)` calls, extracting variable names and their types.
-2. **Manual configuration** — Define type mappings in **Options > Editor > Velocity Context** using the format `$varName:com.example.Type`.
+1. **Automatic Java scanning** — The plugin scans your project's Java files for `context.put("key", value)` and
+`model.addAttribute("key", value)` calls, extracting variable names and their types.
+2. **Manual configuration** — Define type mappings in **Options > Editor > Velocity Context** using the format
+`$varName:com.example.Type`.
 
 Once types are known, typing `$user.` will show:
 - **Properties** — Velocity-style shortcuts derived from getters (e.g., `name` from `getName()`)
@@ -109,7 +112,8 @@ Multi-level chaining is supported: `$user.getAddress().getCity().` resolves each
 
 Go to **Options > Editor > Velocity Context** to configure:
 
-- **Macro Library Files** — comma-separated list of macro library filenames (default: `VM_global_library.vm`). The plugin searches upward from the current file's directory.
+- **Macro Library Files** — comma-separated list of macro library filenames (default: `VM_global_library.vm`).
+The plugin searches upward from the current file's directory.
 - **Context Variables** — one per line, in the format:
   - `$varName` — declares a variable (no type info, basic completion only)
   - `$varName:com.example.Type` — declares a variable with type (enables method/property completion)
@@ -142,7 +146,7 @@ Supported receiver types (and subclasses/implementations):
 - Escaped variables/properties (`\$var`) may still show identifier coloring instead of text coloring
 - The first time a `.vm` file is opened in a project, Java context scanning runs asynchronously — completions from Java appear on the second invocation
 - Some other quirks like breakage for this kind of code: `#if($condition)echo " "#end#if($other) text #end` - easily fixed if `"` and `#end` are separated by space
-
+- For some unknown reason, when the plugin is installed, a random open .vm file would not be highlighted and is displayed as "unrecognized file" - restarting NetBeans fixes it
 ## License
 
 [CDDL 1.0](https://opensource.org/license/CDDL-1.0)

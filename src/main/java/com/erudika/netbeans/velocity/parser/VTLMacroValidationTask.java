@@ -29,9 +29,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
-import javax.swing.text.StyledDocument;
 import org.netbeans.modules.parsing.spi.ParseException;
 import org.netbeans.modules.parsing.spi.ParserResultTask;
 import org.netbeans.modules.parsing.spi.Scheduler;
@@ -41,8 +39,6 @@ import org.netbeans.spi.editor.hints.ErrorDescriptionFactory;
 import org.netbeans.spi.editor.hints.HintsController;
 import org.netbeans.spi.editor.hints.Severity;
 import org.openide.filesystems.FileObject;
-import org.openide.text.NbDocument;
-import org.openide.util.Exceptions;
 
 /**
  * Scheduler task that validates macro call argument counts against their
@@ -78,21 +74,15 @@ public class VTLMacroValidationTask extends ParserResultTask<VTLParserResult> {
 			FileObject fo = vtlResult.getSnapshot().getSource().getFileObject();
 			mergeLibraryMacros(fo, macroParamCounts);
 
-			List<MacroValidationError> errors = validateMacroCalls(astRoot, parser, macroParamCounts, document);
+			List<MacroValidationError> errors = validateMacroCalls(astRoot, parser, macroParamCounts);
 
 			List<ErrorDescription> errorDescs = new ArrayList<>();
 			for (MacroValidationError err : errors) {
-				int start = NbDocument.findLineOffset((StyledDocument) document, Math.max(err.line - 1, 0))
-						+ Math.max(err.column - 1, 0);
-				int end = NbDocument.findLineOffset((StyledDocument) document, Math.max(err.endLine - 1, 0))
-						+ err.endColumn;
-
 				ErrorDescription desc = ErrorDescriptionFactory.createErrorDescription(
 						Severity.WARNING,
 						err.message,
 						document,
-						document.createPosition(start),
-						document.createPosition(end)
+						err.line
 				);
 				errorDescs.add(desc);
 			}
@@ -102,8 +92,8 @@ public class VTLMacroValidationTask extends ParserResultTask<VTLParserResult> {
 			if (sp != null) {
 				sp.setOkStatus();
 			}
-		} catch (BadLocationException | ParseException ex) {
-			Exceptions.printStackTrace(ex);
+		} catch (ParseException ex) {
+			ex.printStackTrace();
 		}
 	}
 
@@ -127,7 +117,7 @@ public class VTLMacroValidationTask extends ParserResultTask<VTLParserResult> {
 	}
 
 	private List<MacroValidationError> validateMacroCalls(SimpleNode root, VelocityParser parser,
-			Map<String, Integer> macroParamCounts, Document document) {
+			Map<String, Integer> macroParamCounts) {
 		MacroCallValidator validator = new MacroCallValidator(parser, macroParamCounts);
 		validator.openTransaction();
 		root.jjtAccept(validator, null);

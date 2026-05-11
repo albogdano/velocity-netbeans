@@ -27,7 +27,7 @@ This is plugin for <a href="https://netbeans.apache.org/">Apache NetBeans</a> th
 
 Velocity is a mature and robust templating language for the JVM. NetBeans used to have pretty good plugins which added
 support for Velocity but through the years those projects were abandoned and NetBeans was left without a proper plugin.
-I looked for alternatives and there were some - the very basic plugin for VS Code which does not allow mixing HTML + VTL1
+I looked for alternatives and there were some - the very basic plugin for VS Code which does not allow mixing HTML + VTL
 in the same file. Then there was IntelliJ with pretty good integration out of the box. For some time I was envious that
 IntelliJ had better Velocity support than NetBeans. So, I decided to bring the missing Velocity plugin back to NetBeans.
 
@@ -77,21 +77,22 @@ If you like it or find it useful, please share it and give it a star. There may 
 mvn clean install
 
 # The installable NBM file will be at:
-# target/nbm/velocity-netbeans-1.0.0-SNAPSHOT.nbm
+# target/nbm/velocity-netbeans-x.y.z-SNAPSHOT.nbm
 ```
 
 ## How to Use
 
 ### Installation
 
-1. Build the NBM file: `mvn clean install`
+1. Build the NBM file or [download the latest NBM package](https://github.com/albogdano/velocity-netbeans/releases)
 2. In NetBeans, go to **Tools > Plugins > Downloaded**
-3. Click **Add Plugins...** and select `target/nbm/velocity-netbeans-1.0.0-SNAPSHOT.nbm`
-4. Click **Install** and restart NetBeans
+3. Click **Add Plugins...** and select the NBM package `velocity-netbeans-x.y.z.nbm`
+4. Click **Install** and **restart NetBeans**
 
 ### Basic Editing
 
-Open any `.vm` or `.vsl` file. You get syntax highlighting, error detection, code folding, and braces matching out of the box.
+Open any `.vm` or `.vsl` file. You get syntax highlighting, error detection, code folding, braces matching
+and all the good stuff out of the box.
 
 ### Autocompletion
 

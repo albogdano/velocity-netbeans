@@ -42,7 +42,9 @@ If you like it or find it useful, please share it and give it a star. There may 
 - **Syntax highlighting** — 67 token types across 10 categories (keyword, directive, comment, string, operator, number, identifier, boolean, separator, unparsed content)
 - **Error highlighting** — real-time syntax error detection with error stripe annotations
 - **Code folding** — collapsible regions for `#foreach`, `#if`, `#elseif`, `#else`, `#macro` blocks
-- **Braces matching** — matches directive pairs (`#if`/`#end`, `#foreach`/`#end`, `#macro`/`#end`)
+- **Macro parameter validation** — calls to Velocimacros are checked if they have the correct number of parameters.
+- **Hyperlinks to macro definitions** — <kbd>Ctrl</kbd> + <kbd>Click</kbd> on a macro will take you to its definition.
+- **Braces matching** — both HTML and VTL brace matching (for pairs `#if`/`#end`, `#foreach`/`#end`, `#macro`/`#end`)
 - **HTML embedding** — full HTML support (highlighting, completion, validation) for HTML content between VTL directives
 - **Autocompletion** — context-aware completions for:
   - Directives (`#if`, `#foreach`, `#set`, `#macro`, `#include`, `#parse`, `#define`, `#evaluate`, `#stop`, `#break`)

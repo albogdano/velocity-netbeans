@@ -31,7 +31,11 @@ I looked for alternatives and there were some - the very basic plugin for VS Cod
 in the same file. Then there was IntelliJ with pretty good integration out of the box. For some time I was envious that
 IntelliJ had better Velocity support than NetBeans. So, I decided to bring the missing Velocity plugin back to NetBeans.
 
+[![Screenshot](img/screen.giv)](img/screen.gif)
+
 [![Screenshot](img/screen1.png)](img/screen1.png)
+
+[![Screenshot](img/screen21.png)](img/screen2.png)
 
 **Note:** The project was vibe-coded over a long weekend using a combination of OpenCode + GLM/Opus and cost me around **$60**.
 If you like it or find it useful, please share it and give it a star. There may still be issues, so please

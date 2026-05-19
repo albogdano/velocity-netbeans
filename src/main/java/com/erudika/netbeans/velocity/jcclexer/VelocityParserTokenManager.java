@@ -8,6 +8,48 @@ import java.util.Stack;
 /** Token Manager. */
 @SuppressWarnings ("unused")
 public class VelocityParserTokenManager implements VelocityParserConstants {
+    public static final class RestartState {
+        public final int lexState;
+        public final int lparen;
+        public final int rparen;
+        public final boolean inReference;
+        public final boolean inComment;
+        public final boolean inUnparsed;
+        public final boolean inSet;
+        public final boolean inDirective;
+        public final char prevChar;
+        public final boolean inDoubleQuotedText;
+        public final boolean inSingleQuotedText;
+        public final java.util.List<Hashtable<String, Integer>> stateStack;
+
+        private RestartState(
+                final int lexState,
+                final int lparen,
+                final int rparen,
+                final boolean inReference,
+                final boolean inComment,
+                final boolean inUnparsed,
+                final boolean inSet,
+                final boolean inDirective,
+                final char prevChar,
+                final boolean inDoubleQuotedText,
+                final boolean inSingleQuotedText,
+                final java.util.List<Hashtable<String, Integer>> stateStack) {
+            this.lexState = lexState;
+            this.lparen = lparen;
+            this.rparen = rparen;
+            this.inReference = inReference;
+            this.inComment = inComment;
+            this.inUnparsed = inUnparsed;
+            this.inSet = inSet;
+            this.inDirective = inDirective;
+            this.prevChar = prevChar;
+            this.inDoubleQuotedText = inDoubleQuotedText;
+            this.inSingleQuotedText = inSingleQuotedText;
+            this.stateStack = stateStack;
+        }
+    }
+
     private int fileDepth = 0;
 
     private int lparen = 0;
@@ -28,6 +70,8 @@ public class VelocityParserTokenManager implements VelocityParserConstants {
      *  so that we don't incorrectly enter directive mode for HTML anchor links.
      */
     private char prevChar = 0;
+    private boolean inDoubleQuotedText = false;
+    private boolean inSingleQuotedText = false;
 
     /**
      *  Set of VTL built-in directive keywords used to distinguish
@@ -74,6 +118,123 @@ public class VelocityParserTokenManager implements VelocityParserConstants {
             input_stream.backup(peekCount);
         }
         return sb.toString();
+    }
+
+    private boolean isInQuotedText()
+    {
+        return inDoubleQuotedText || inSingleQuotedText;
+    }
+
+    public boolean isInDoubleQuotedText()
+    {
+        return inDoubleQuotedText;
+    }
+
+    public boolean isInSingleQuotedText()
+    {
+        return inSingleQuotedText;
+    }
+
+    public void setQuotedTextState(final boolean inDoubleQuotedText, final boolean inSingleQuotedText)
+    {
+        this.inDoubleQuotedText = inDoubleQuotedText;
+        this.inSingleQuotedText = inSingleQuotedText;
+    }
+
+    public RestartState getRestartState()
+    {
+        final java.util.List<Hashtable<String, Integer>> stackCopy = new java.util.ArrayList<Hashtable<String, Integer>>(stateStack.size());
+        for (Hashtable<String, Integer> frame : stateStack)
+        {
+            stackCopy.add(new Hashtable<String, Integer>(frame));
+        }
+
+        return new RestartState(
+                curLexState,
+                lparen,
+                rparen,
+                inReference,
+                inComment,
+                inUnparsed,
+                inSet,
+                inDirective,
+                prevChar,
+                inDoubleQuotedText,
+                inSingleQuotedText,
+                stackCopy);
+    }
+
+    public void restoreRestartState(final RestartState state)
+    {
+        if (state == null)
+            return;
+
+        lparen = state.lparen;
+        rparen = state.rparen;
+        inReference = state.inReference;
+        inComment = state.inComment;
+        inUnparsed = state.inUnparsed;
+        inSet = state.inSet;
+        inDirective = state.inDirective;
+        prevChar = state.prevChar;
+        inDoubleQuotedText = state.inDoubleQuotedText;
+        inSingleQuotedText = state.inSingleQuotedText;
+
+        stateStack.clear();
+        if (state.stateStack != null)
+        {
+            for (Hashtable<String, Integer> frame : state.stateStack)
+            {
+                stateStack.push(new Hashtable<String, Integer>(frame));
+            }
+        }
+
+        SwitchTo(state.lexState);
+    }
+
+    public boolean isDefaultRestartState()
+    {
+        return curLexState == DEFAULT
+                && lparen == 0
+                && rparen == 0
+                && !inReference
+                && !inComment
+                && !inUnparsed
+                && !inSet
+                && !inDirective
+                && prevChar == 0
+                && !inDoubleQuotedText
+                && !inSingleQuotedText
+                && stateStack.isEmpty();
+    }
+
+    private void updateQuotedTextState(final String tokenText, final int lexStateAtMatch)
+    {
+        if (lexStateAtMatch != DEFAULT || tokenText == null || tokenText.isEmpty())
+            return;
+
+        boolean escaped = false;
+        for (int i = 0; i < tokenText.length(); i++)
+        {
+            final char c = tokenText.charAt(i);
+
+            if (escaped)
+            {
+                escaped = false;
+                continue;
+            }
+
+            if (c == '\\')
+            {
+                escaped = true;
+                continue;
+            }
+
+            if (c == '"' && !inSingleQuotedText)
+                inDoubleQuotedText = !inDoubleQuotedText;
+            else if (c == '\'' && !inDoubleQuotedText)
+                inSingleQuotedText = !inSingleQuotedText;
+        }
     }
 
     /**
@@ -162,6 +323,8 @@ public class VelocityParserTokenManager implements VelocityParserConstants {
         inUnparsed = false;
         inSet = false;
         prevChar = 0;
+        inDoubleQuotedText = false;
+        inSingleQuotedText = false;
 
         return;
     }
@@ -5213,6 +5376,7 @@ public Token getNextToken()
       matchedToken.specialToken = specialToken;
       return matchedToken;
    }
+
    image = jjimage;
    image.setLength(0);
    jjimageLen = 0;
@@ -5310,6 +5474,7 @@ public Token getNextToken()
      }
      if (jjmatchedKind != 0x7fffffff)
      {
+        final int matchedLexState = curLexState;
         if (jjmatchedPos + 1 < curPos)
            input_stream.backup(curPos - jjmatchedPos - 1);
 if ((jjtoToken[jjmatchedKind >> 6] & (1L << (jjmatchedKind & 077))) != 0L)
@@ -5317,6 +5482,7 @@ if ((jjtoToken[jjmatchedKind >> 6] & (1L << (jjmatchedKind & 077))) != 0L)
             matchedToken = jjFillToken();
             matchedToken.specialToken = specialToken;
             TokenLexicalActions(matchedToken);
+            updateQuotedTextState(matchedToken.image, matchedLexState);
             if (matchedToken.image != null && matchedToken.image.length() > 0)
                prevChar = matchedToken.image.charAt(matchedToken.image.length() - 1);
         if (jjnewLexState[jjmatchedKind] != -1)
@@ -5419,7 +5585,7 @@ void MoreLexicalActions()
       case 14 :
          image.append(input_stream.GetSuffix(jjimageLen));
          jjimageLen = 0;
-        if (!inComment && !inUnparsed)
+        if (!inComment && !inUnparsed && !(curLexState == DEFAULT && isInQuotedText()))
         {
             /*
              * if we find ourselves in REFERENCE, we need to pop down
@@ -5443,7 +5609,7 @@ void MoreLexicalActions()
       case 15 :
          image.append(input_stream.GetSuffix(jjimageLen));
          jjimageLen = 0;
-        if (!inComment && !inUnparsed)
+        if (!inComment && !inUnparsed && !(curLexState == DEFAULT && isInQuotedText()))
         {
             /*
              * if we find ourselves in REFERENCE, we need to pop down
@@ -5508,35 +5674,15 @@ void MoreLexicalActions()
              * I don't really like this, but I can't think of a legal way
              * you are going into DIRECTIVE while in REFERENCE.  -gmj
              */
-            int origState = curLexState;
-
             if (curLexState == REFERENCE || curLexState == REFMODIFIER)
             {
                 inReference = false;
                 stateStackPop();
             }
 
-            /*
-             * If # is preceded by a quote character and we were in DEFAULT state,
-             * check if # starts a known VTL directive. If not, treat # as plain
-             * text rather than a directive start. This handles HTML anchor
-             * references like href="#section" where # is not a VTL directive,
-             * while still allowing directives like #end after closing quotes:
-             *   class="active"#end
-             */
-            if (origState == DEFAULT && (prevChar == '"' || prevChar == '\''))
+            if (curLexState == DEFAULT && isInQuotedText())
             {
-                String peekIdent = peekDirectiveIdentifier();
-                if (!isKnownDirectiveKeyword(peekIdent))
-                {
-                    // Not a directive - # is plain text in an HTML attribute
-                }
-                else
-                {
-                    inDirective = true;
-                    stateStackPush();
-                    SwitchTo(PRE_DIRECTIVE);
-                }
+                // # inside quoted text is treated as plain text.
             }
             else
             {

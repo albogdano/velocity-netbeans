@@ -63,13 +63,7 @@ public class HTMLEmbeddingProvider extends EmbeddingProvider
                     {
                         final int offset = ts.offset();
                         final int length = token.length();
-
-                        final CharSequence fullText = snapshot.getText();
-                        final CharSequence text = fullText.subSequence(offset, offset + length);
-                        if (HTMLEmbeddingSupport.containsHtmlContent(text))
-                        {
-                            embeddings.add(snapshot.create(offset, length, TARGET_MIME_TYPE));
-                        }
+                        embeddings.add(snapshot.create(offset, length, TARGET_MIME_TYPE));
                     }
                 }
             }

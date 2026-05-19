@@ -26,7 +26,7 @@ class VTLLexer implements Lexer<VTLTokenId>
    private final LexerRestartInfo<VTLTokenId> m_Info;
    private final VelocityParserTokenManager   m_VelocityParserTokenManager;
 
-   private Integer m_CurrLexState;
+   private VelocityParserTokenManager.RestartState m_CurrState;
 
    /**
     * Creates new {@code VTLLexer}.
@@ -38,7 +38,7 @@ class VTLLexer implements Lexer<VTLTokenId>
    {
       m_Info                       = info;
       m_VelocityParserTokenManager = new VelocityParserTokenManager(new VelocityCharStream(info.input()));
-      m_CurrLexState               = null;
+      m_CurrState                  = null;
 
       // Register built-in directives as known library macros so the token manager
       // produces MACROCALL_DIRECTIVE (highlighted as directive) instead of WORD.
@@ -48,8 +48,14 @@ class VTLLexer implements Lexer<VTLTokenId>
       VelocityParser.addLibraryMacroName("evaluate");
       VelocityParser.addLibraryMacroName("break");
 
-      if (info.state() != null)
+      if (info.state() instanceof VelocityParserTokenManager.RestartState)
+      {
+         m_VelocityParserTokenManager.restoreRestartState((VelocityParserTokenManager.RestartState)info.state());
+      }
+      else if (info.state() instanceof Integer)
+      {
          m_VelocityParserTokenManager.SwitchTo((Integer)info.state());
+      }
    }
 
    /**
@@ -61,11 +67,10 @@ class VTLLexer implements Lexer<VTLTokenId>
 
       final com.erudika.netbeans.velocity.jcclexer.Token token = m_VelocityParserTokenManager.getNextToken();
 
-      final int iCurLexState = m_VelocityParserTokenManager.getCurrLexState();
-      if (iCurLexState == VelocityParserConstants.DEFAULT)
-         m_CurrLexState = null;
+      if (m_VelocityParserTokenManager.isDefaultRestartState())
+         m_CurrState = null;
       else
-         m_CurrLexState = iCurLexState;
+         m_CurrState = m_VelocityParserTokenManager.getRestartState();
 
       if (m_Info.input().readLength() < 1)
          returnToken = null;
@@ -88,7 +93,7 @@ class VTLLexer implements Lexer<VTLTokenId>
     */
    @Override public Object state()
    {
-      return(m_CurrLexState);
+      return(m_CurrState);
    }
 
    /**

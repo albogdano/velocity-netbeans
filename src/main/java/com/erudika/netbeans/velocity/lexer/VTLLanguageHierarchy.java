@@ -173,7 +173,7 @@ public class VTLLanguageHierarchy extends LanguageHierarchy<VTLTokenId>
     */
    @Override protected LanguageEmbedding<?> embedding(final Token<VTLTokenId> token, final LanguagePath languagePath, final InputAttributes inputAttributes)
    {
-      if ("TEXT".equals(token.id().name()) && HTMLEmbeddingSupport.mayContainHtmlMarkup(token.text()))
+      if ("TEXT".equals(token.id().name()))
       {
          final Language<?> htmlLang = Language.find("text/html");
          if (htmlLang != null)

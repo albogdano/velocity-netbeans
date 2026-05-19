@@ -9,7 +9,6 @@
  */
 package com.erudika.netbeans.velocity.lexer;
 
-import com.erudika.netbeans.velocity.embedding.HTMLEmbeddingSupport;
 import static com.erudika.netbeans.velocity.jcclexer.VelocityParserConstants.*;
 import com.erudika.netbeans.velocity.parser.VTLParser;
 import java.util.Arrays;
@@ -175,6 +174,8 @@ public class VTLLanguageHierarchy extends LanguageHierarchy<VTLTokenId>
    {
       if ("TEXT".equals(token.id().name()))
       {
+         // Always embed TEXT as HTML to keep attribute highlighting stable when
+         // VTL directives/references split tag or attribute value fragments.
          final Language<?> htmlLang = Language.find("text/html");
          if (htmlLang != null)
             return(LanguageEmbedding.create(htmlLang, 0, 0, true));

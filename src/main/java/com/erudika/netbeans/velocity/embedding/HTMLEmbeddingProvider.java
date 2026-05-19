@@ -61,6 +61,8 @@ public class HTMLEmbeddingProvider extends EmbeddingProvider
                     final VTLTokenId vtlId = (VTLTokenId) token.id();
                     if ("TEXT".equals(vtlId.name()) && token.text() != null && token.text().length() > 0)
                     {
+                        // Mirror lexer-level strategy: include all TEXT fragments so
+                        // HTML parsing stays continuous across interleaved VTL tokens.
                         final int offset = ts.offset();
                         final int length = token.length();
                         embeddings.add(snapshot.create(offset, length, TARGET_MIME_TYPE));
